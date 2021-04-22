@@ -6,11 +6,21 @@ module.exports = app => {
     app.post('/api/user_details',async (req,res)=>{
         try{
             const userIDParam = req.body.userID
-            const upvoteResponse = await userModel.findOne({_id: userIDParam})
-            res.send(upvoteResponse)
+            const details = await userModel.findOne({_id: userIDParam}).select('-rewardsPurchased')
+            res.send(details)
         }catch(e){
             console.log(e)
             res.send({})
+        }
+    })
+    app.post('/api/user_rewards',async (req,res)=>{
+        try{
+            const userIDParam = req.body.userID
+            const rewards = await userModel.findOne({_id: userIDParam}).populate('rewards._id').select('rewardsPurchased')
+            res.send(rewards)
+        }catch(e){
+            console.log(e)
+            res.send([])
         }
     })
 
