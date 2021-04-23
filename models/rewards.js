@@ -18,4 +18,5 @@ const RewardsSchema = new Schema({
   },
 });
 
-module.exports = Challenge = mongoose.model("challenge", ChallengeSchema);
+module.exports.Rewards = mongoose.model("rewards", RewardsSchema);
+module.exports.RewardsSchema = RewardsSchema;

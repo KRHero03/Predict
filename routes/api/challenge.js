@@ -1,7 +1,8 @@
 const { response } = require("express");
 const express = require("express");
 const app = express();
-const challengeModel = require("../../models/challenge");
+const {Challenge} = require("../../models/challenge");
+const challengeModel = Challenge;
 module.exports = app => {
     app.post('/api/create_challenge',async (req,res)=>{
         try {

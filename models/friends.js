@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const challenge = require("./challenge");
+const {ChallengeSchema} = require("./challenge");
 const Schema = mongoose.Schema;
 
 const FriendsSchema = new Schema({
@@ -12,7 +12,7 @@ const FriendsSchema = new Schema({
     required: true
   },
   battleHistory: [
-    challenge,
+    ChallengeSchema,
   ],
   battleWon:{
     type: Number,
