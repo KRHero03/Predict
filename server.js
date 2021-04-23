@@ -14,11 +14,9 @@ app.use(bodyParser.json());
 
 
 require("./models/user.js");
-require("./models/tags.js");
-require("./models/stories.js");
-require("./models/comments.js");
-require("./models/upvotes.js");
-require("./models/followers.js");
+require("./models/friends.js");
+require("./models/challenge.js");
+require("./models/rewards.js");
 
 app.use(
   cookieSession({
@@ -52,11 +50,10 @@ require("./config/passport");
 
 
 require("./routes/api/auth.js")(app);
-require("./routes/api/tags.js")(app);
-require("./routes/api/stories.js")(app);
-require("./routes/api/follower.js")(app);
-require("./routes/api/upvotes.js")(app);
+require("./routes/api/friends.js")(app);
 require("./routes/api/users.js")(app);
+require("./routes/api/rewards.js")(app);
+require("./routes/api/challenge.js")(app);
 
 // Server static assets if in production
 if (env === "production") {
