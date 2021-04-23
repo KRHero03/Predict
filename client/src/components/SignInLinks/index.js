@@ -1,5 +1,5 @@
 import { Avatar, Dialog, DialogContent, DialogTitle, Divider, List, ListItem, ListItemIcon, ListItemText, Typography,Box,IconButton } from "@material-ui/core"
-import { AccountCircle,Group, ExitToApp, GroupWork, Help, Home,Brightness4,Store } from "@material-ui/icons"
+import { AccountCircle,Group, ExitToApp, GroupWork, Help,MonetizationOn, Home,Brightness4,Store } from "@material-ui/icons"
 import { Component } from "react"
 import { withRouter } from 'react-router-dom'
 import policy from '../policy'
@@ -85,12 +85,12 @@ class SignInLinks extends Component {
             <ListItemText primary="Profile" />
           </ListItem>
           <Divider />
-          <ListItem button key="Friends" component="a" href="/">
+          <ListItem button key="Friends" component="a" href="/friends">
             <ListItemIcon> <Group /></ListItemIcon>
             <ListItemText primary="Friends" />
           </ListItem>
-          <ListItem button key="Placed Bets" component="a" href="/">
-            <ListItemIcon> <Home /></ListItemIcon>
+          <ListItem button key="Placed Bets" component="a" href="/bets">
+            <ListItemIcon> <MonetizationOn /></ListItemIcon>
             <ListItemText primary="Placed Bets" />
           </ListItem>
           <ListItem button key="Rewards Store" component="a" href="/">

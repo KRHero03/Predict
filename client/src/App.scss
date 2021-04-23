@@ -3,8 +3,9 @@ $sm: 600px;
 $md: 960px;
 $lg: 1280px;
 $xl: 1920px;
+@import url('https://fonts.googleapis.com/css?family=Lato');
 *{
-  transition: 0.1s all ease-in-out;
+  font-family: "Lato";
 }
 $spacing: 8;
 
@@ -155,7 +156,7 @@ a{
 
 .home {
   margin-top: 5rem;
-
+  min-height: 80vh;
   @media screen and (min-width: $md) {
     margin-left: 20rem;
     margin-right: 20rem;
@@ -203,7 +204,7 @@ a{
 /* Footer SASS */
 
 .footer {
-  margin-top: 7rem;
+  margin-top: auto;
 }
 
 .footerCenter {

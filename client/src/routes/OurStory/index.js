@@ -50,7 +50,16 @@ class AboutUs extends React.Component {
               <Grid item xs={12}>
                 <Typography variant="h6" align="left">The Team</Typography>
                 <p align="left">
-                  Team X-Tracks @ NIT Surat
+                  U18CO019 Dhruv Rana
+                </p>
+                <p align='left'>
+                  U18CO024 Smit Patel
+                </p>
+                <p align='left'>
+                  U18CO026 Darshil Savaliya
+                </p>
+                <p align='left'>
+                  U18CO081 Krunal Rank
                 </p>
               </Grid>
               <Grid item xs={12}>
@@ -64,12 +73,12 @@ class AboutUs extends React.Component {
                 <p align="left">
                   Fax: +22 675 124 5
                 </p>
-                <p align="left" color="textSecondary">
+                <Typography  align="left" color="textSecondary">
                   Predict<br />
                   NIT Surat, Surat<br />
                   India<br />
                   395007
-                </p>
+                </Typography>
               </Grid>
             </Grid>
 
