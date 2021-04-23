@@ -9,8 +9,6 @@ const {env,dev,production}  = require('./config/keys.js');
 
 
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
 
 require("./models/user.js");
@@ -37,7 +35,7 @@ else
 
 // Use mongoose to connect to mongoDB
 mongoose
-  .connect(db)
+  .connect(db,{ useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected successfully!"))
   .catch(err => console.log(err));
 

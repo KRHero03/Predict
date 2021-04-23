@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const rewards = require("./rewards");
+const {RewardsSchema} = require("./rewards");
 const Schema = mongoose.Schema;
 
 // Create the Schema
@@ -23,7 +23,7 @@ const UserSchema = new Schema({
     default: 100,
   },
   rewardsPurchased: [
-    rewards,
+    RewardsSchema,
   ],
 });
 
