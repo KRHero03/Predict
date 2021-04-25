@@ -6,6 +6,7 @@ import { Menu, Search } from '@material-ui/icons'
 import { withRouter } from "react-router"
 import GuestLinks from '../GuestLinks'
 import SignInLinks from '../SignInLinks'
+import axios from 'axios'
 
 function ElevationScroll(props) {
   const { children, window } = props;
@@ -26,14 +27,27 @@ class Navbar extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      isAuthenticated: true,
+      isAuthenticated: false,
       user: null,
-      isLoading: false,
+      isLoading: true,
+      search: '',
     }
   }
 
-  componentDidMount() {
-    //Load User Details
+  async componentDidMount() {
+    const response = await axios.get('/api/current_user')
+    console.log(response)
+    if (!response.data) {
+      this.setState({
+        isLoading: false
+      })
+      return
+    }
+    this.setState({
+      isAuthenticated: true,
+      isLoading: false,
+      user: response.data
+    })
 
   }
 
@@ -62,6 +76,19 @@ class Navbar extends Component {
       openHelp: !this.state.openHelp,
     })
   }
+  handleSearchVal = (e) => {
+    this.setState({
+      search: e.target.value
+    })
+  }
+  handleSearch = (e) => {
+
+    if (e.key === 'Enter') {
+      this.props.history.push('/search/' + this.state.search)
+      return
+    }
+  }
+
 
 
 
@@ -85,7 +112,7 @@ class Navbar extends Component {
                   </IconButton>
                   <React.Fragment key="left">
                     <Drawer anchor="left" open={this.state.leftDrawer} onClose={this.toggleDrawer}>
-                      <SignInLinks toggleDarkMode={this.props.toggleDarkMode} />
+                      <SignInLinks toggleDarkMode={this.props.toggleDarkMode} user={this.state.user} />
                     </Drawer>
                   </React.Fragment>
                 </div>
@@ -96,7 +123,25 @@ class Navbar extends Component {
               </Typography>
 
               <div className='grow' />
+              {
+              this.state.isAuthenticated
+              ?              
+              <div className='search'>
+                <div className='searchIcon'>
+                  <Search />  
+                </div>
+                <InputBase
+                  placeholder="Search Users..."
+                  className='inputBase'
+                  inputProps={{ 'aria-label': 'search' }}
+                  onKeyUp={this.handleSearch}
+                  onChange={this.handleSearchVal}
+                />
+              </div>
+              :
 
+              null
+              }
               {
                 this.state.isLoading ? null :
                   !this.state.isAuthenticated ?

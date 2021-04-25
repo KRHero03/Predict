@@ -73,7 +73,7 @@ class AboutUs extends React.Component {
                 <p align="left">
                   Fax: +22 675 124 5
                 </p>
-                <Typography  align="left" color="textSecondary">
+                <Typography  align="left"  color="textSecondary">
                   Predict<br />
                   NIT Surat, Surat<br />
                   India<br />

@@ -9,12 +9,14 @@ module.exports = {
       mongoURL: process.env.MONGO_DEV_URL,
       googleClientID: process.env.GOOGLE_CLIENT_ID,
       googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      rapidApiKey: process.env.RAPID_API_KEY,
       port: process.env.PORT,
     },
     production: {
       mongoURL: process.env.MONGO_PRODUCTION_URL,
       googleClientID: process.env.GOOGLE_CLIENT_ID,
       googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      rapidApiKey: process.env.RAPID_API_KEY,
       port: process.env.PORT,
     },
 }

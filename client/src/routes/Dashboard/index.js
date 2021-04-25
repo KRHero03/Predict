@@ -6,6 +6,7 @@ import MetaTags from "react-meta-tags";
 import { Typography, Card, Fab, CircularProgress, Box, Link, CardHeader, CardActions, CardContent, Avatar, Button, IconButton, Tooltip } from "@material-ui/core";
 import { PlayArrow } from '@material-ui/icons';
 import Logo from "../../logo.png";
+import axios from 'axios'
 
 class Dashboard extends Component {
   constructor(props) {
@@ -17,6 +18,16 @@ class Dashboard extends Component {
     };
   }
   async componentDidMount() {
+    const response = await axios.get('/api/current_user')
+    if (!response.data){
+      this.props.history.push('/')
+      return
+    }
+    this.setState({
+      isAuthenticated: true,
+      isLoading: false,
+      user: response.data
+    })
   }
 
 

@@ -3,123 +3,107 @@ const app = express();
 const friendsModel = require("../../models/friends");
 const users = require("../../models/user");
 module.exports = app => {
-    app.post('/api/friends', async (req, res) => {
+
+
+    app.post('/api/send_friend_request',async(req,res)=>{
         try{
-            const userID = req.user._id;
-            const response = await friendsModel.find({ userID2: userID });
-            let friends = []
+            const cID = req.user._id
+            const userID = req.body.id
+            if(cID===userID){
+                res.send({success:0})
+                return
+            }
+            await users.update({_id:cID},{$push:{sentFriendRequests:userID}})
+            await users.update({_id:userID},{$push:{friendRequests:cID}})
 
-            await Promise.all(response.map(async (obj) => {
-                const userResponse = await users.findOne({ _id: obj.userID1 })
-                friends.push(userResponse)
-            }))
+            res.send({success:1})
 
-            res.send(friends)
         }catch(e){
             console.log(e)
-            res.send([])
+            res.send({success:0})
         }
     })
 
-    app.post('/api/friends_count', async (req, res) => {
+    app.post('/api/withdraw_friend_request',async(req,res)=>{
         try{
-            const userID = req.body.userID;
+            const cID = req.user._id
+            const userID = req.body.id
+            if(cID===userID){
+                res.send({success:0})
+                return
+            }
+            await users.update({_id:cID},{$pull:{sentFriendRequests:userID}})
+            await users.update({_id:userID},{$pull:{friendRequests:cID}})
 
-            const response = await friendsModel.find({ userID2: userID });
-            let friends = []
+            res.send({success:1})
 
-            await Promise.all(response.map(async (obj) => {
-                const userResponse = await users.findOne({ _id: obj.userID1 })
-                friends.push(userResponse)
-            }))
-
-            res.send(friends.length.toString())
         }catch(e){
             console.log(e)
-            res.send("")
+            res.send({success:0})
         }
     })
 
-    app.post('/api/friends', async (req, res) => {
-        try {
-            const userID = req.user._id;
+    app.post('/api/accept_friend_request',async(req,res)=>{
+        try{
+            const cID = req.user._id
+            const userID = req.body.id
+            if(cID===userID){
+                res.send({success:0})
+                return
+            }
+            await users.update({_id:cID},{$pull:{friendRequests:userID}})
+            await users.update({_id:userID},{$pull:{sentFriendRequests:cID}})
+            await users.update({_id:cID},{$push:{friends:userID}})
+            await users.update({_id:userID},{$push:{friends:cID}})
 
-            const response = await friendsModel.find({ userID1: userID });
-            let friends = []
-            await Promise.all(response.map(async (obj) => {
-                const userResponse = await users.findOne({ _id: obj.userID2 })
-                friends.push(userResponse)
-            }))
-            res.send(friends)
-        } catch (e) {
+            res.send({success:1})
+
+        }catch(e){
             console.log(e)
-            res.send([])
+            res.send({success:0})
         }
     })
+    app.post('/api/reject_friend_request',async(req,res)=>{
+        try{
+            const cID = req.user._id
+            const userID = req.body.id
+            if(cID===userID){
+                res.send({success:0})
+                return
+            }
+            await users.update({_id:cID},{$pull:{friendRequests:userID}})
+            await users.update({_id:userID},{$pull:{sentFriendRequests:cID}})
 
-    app.post('/api/friends_count', async (req, res) => {
-        try {
+            res.send({success:1})
 
-            const userID = req.body.userID;
-
-            const response = await friendsModel.find({ userID1: userID });
-            
-            let friends = []
-            await Promise.all(response.map(async (obj) => {
-                const userResponse = await users.findOne({ _id: obj.userID2 })
-                friends.push(userResponse)
-            }))
-            res.send(friends.length.toString())
-        } catch (e) {
+        }catch(e){
             console.log(e)
-            res.send("")
+            res.send({success:0})
         }
     })
 
-    app.post('/api/check_friend', async (req, res) => {
-        try {
+    app.post('/api/remove_friend',async(req,res)=>{
+        try{
+            const cID = req.user._id
+            const userID = req.body.id
+            if(cID===userID){
+                res.send({success:0})
+                return
+            }
+            await users.update({_id:cID},{$pull:{friends:userID}})
+            await users.update({_id:userID},{$pull:{friends:cID}})
 
-            const userID1Param = req.user._id
-            const userID2Param = req.body.userID2
+            res.send({success:1})
 
-            const response = await friendsModel.find({ $and: [{ userID1: userID1Param }, { userID2: userID2Param }] })
-
-            if (response.length > 0) res.send("1")
-            else res.send("0")
-        } catch (e) {
-            res.send("0")
-        }
-    })
-
-    app.post('/api/remove_friend', async (req, res) => {
-        try {
-
-            const userID1Param = req.user._id
-            const userID2Param = req.body.userID2
-
-            const response = await friendsModel.deleteOne({ $and: [{ userID1: userID1Param }, { userID2: userID2Param }] })
-            if (response) res.send("1")
-            else res.send("0")
-        } catch (e) {
+        }catch(e){
             console.log(e)
-            res.send("0")
+            res.send({success:0})
         }
     })
 
-    app.post('/api/add_friend', async (req, res) => {
-        try {
 
-            const userID1Param = req.user._id
-            const userID2Param = req.body.userID2
 
-            const response = await friendsModel.create({ userID1: userID1Param, userID2: userID2Param })
-            if (response) res.send("1")
-            else res.send("0")
-        } catch (e) {
-            console.log(e)
-            res.send("0")
-        }
-    })
+    
 
     app.post('/api/battle_history', async (req, res) => {
         try{

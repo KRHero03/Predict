@@ -1,9 +1,11 @@
-import { Avatar, Dialog, DialogContent, DialogTitle, Divider, List, ListItem, ListItemIcon, ListItemText, Typography,Box,IconButton } from "@material-ui/core"
+import { Avatar, Dialog, DialogContent, DialogTitle, Divider, List, ListItem, ListItemIcon, ListItemText, Typography,Box,IconButton,Link } from "@material-ui/core"
 import { AccountCircle,Group, ExitToApp, GroupWork, Help,MonetizationOn, Home,Brightness4,Store } from "@material-ui/icons"
 import { Component } from "react"
 import { withRouter } from 'react-router-dom'
 import policy from '../policy'
+import axios from 'axios'
 var template = { __html: policy };
+
 
 class SignInLinks extends Component {
 
@@ -13,18 +15,10 @@ class SignInLinks extends Component {
     this.state = {
       openPolicy: false,
       openHelp: false,
-      isAuthenticated: true,
-      user: null,
-      isLoading: false,
+      user: this.props.user,
       isModalOpen: false,
     }
-
-  }
-
-  componentDidMount()   {
-    //Fetch User Details
-    
-  }
+  } 
 
 
   preventDefault = (event) => event.preventDefault();
@@ -47,12 +41,6 @@ class SignInLinks extends Component {
     })
   }
 
-  signOutMethod = async () => {
-    // TODO Implement Sign Out
-
-    this.props.history.push('/')
-  }
-
 
   toggleModalOpen = () => {
     this.setState({
@@ -68,12 +56,12 @@ class SignInLinks extends Component {
           <ListItem style={{display:'block'}}>
             <Box display='flex' alignItems='center' justifyContent='space-between'>
 
-            <Avatar alt={"DisplayName"} src={"PhotoURL"} className='drawerPhoto' onClick={this.toggleModalOpen} />      
+            <Avatar alt={this.state.user.name} src={this.state.user.photo} className='drawerPhoto' onClick={this.toggleModalOpen} />      
             <IconButton onClick={()=>{this.props.toggleDarkMode()}}>
               <Brightness4/>
             </IconButton>
             </Box>      
-            <Typography variant="h6" >Hey There,<br/> {"DisplayName"}</Typography>
+            <Typography variant="h6" >Hey There,<br/> {this.state.user.name}</Typography>
           </ListItem>
           <Divider />
           <ListItem button key="Home" component="a" href="/">
@@ -85,7 +73,7 @@ class SignInLinks extends Component {
             <ListItemText primary="Profile" />
           </ListItem>
           <Divider />
-          <ListItem button key="Friends" component="a" href="/friends">
+          <ListItem button key="Friends" component="a" href="/friends/0">
             <ListItemIcon> <Group /></ListItemIcon>
             <ListItemText primary="Friends" />
           </ListItem>
@@ -106,10 +94,12 @@ class SignInLinks extends Component {
             <ListItemIcon> <Help /></ListItemIcon>
             <ListItemText primary="Help" />
           </ListItem>
-          <ListItem button key="Sign Out" onClick={this.signOutMethod}>
+          <Link href='/api/logout' component='a' className='link'>
+          <ListItem button key="Sign Out">
             <ListItemIcon> <ExitToApp /></ListItemIcon>
             <ListItemText primary="Sign Out" />
           </ListItem>
+          </Link>
           <Divider />
           <ListItem key="Copyright">
             <ListItemText secondary="© Copyright 2021 - Present" />
@@ -150,7 +140,7 @@ class SignInLinks extends Component {
             <Dialog className='dialog'
               aria-labelledby='Profile Photo Dialog'
               aria-describedby='Profile Photo' onClose={this.toggleModalOpen} open={this.state.isModalOpen}>
-                <img src={"PhotoURL"} alt='Profile'/>
+                <img src={this.state.user.photo} alt='Profile'/>
             </Dialog>
             <Dialog className='dialog'
               aria-describedby="alert-dialog-description" onClose={this.handlePolicyModal} open={this.state.openPolicy}>

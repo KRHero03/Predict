@@ -12,6 +12,15 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
+  friendRequests: [{
+    type:String,
+  }],
+  sentFriendRequests: [{
+    type:String,
+  }],
+  friends: [{
+    type:String,
+  }],
   photo: {
     type: String,
     required: true,

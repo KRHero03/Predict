@@ -10,6 +10,10 @@ const {env,dev,production}  = require('./config/keys.js');
 
 const app = express();
 
+// Body Parser
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+
 
 require("./models/user.js");
 require("./models/friends.js");
@@ -48,6 +52,8 @@ require("./config/passport");
 
 
 require("./routes/api/auth.js")(app);
+require("./routes/api/search.js")(app);
+require("./routes/api/matches.js")(app);
 require("./routes/api/friends.js")(app);
 require("./routes/api/users.js")(app);
 require("./routes/api/rewards.js")(app);

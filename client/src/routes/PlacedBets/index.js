@@ -6,6 +6,7 @@ import MetaTags from "react-meta-tags";
 import { Typography, Card, Box, CardActions, CardContent, Avatar, IconButton, Tooltip } from "@material-ui/core";
 import { Delete } from '@material-ui/icons';
 import Logo from "../../logo.png";
+import axios from 'axios'
 
 class PlacedBets extends Component {
   constructor(props) {
@@ -16,7 +17,18 @@ class PlacedBets extends Component {
       isUserDataLoading: false,
     };
   }
+  
   async componentDidMount() {
+    const response = await axios.get('/api/current_user')
+    if (!response.data){
+      this.props.history.push('/')
+      return
+    }
+    this.setState({
+      isAuthenticated: true,
+      isLoading: false,
+      user: response.data
+    })
   }
 
 

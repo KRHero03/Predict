@@ -133,6 +133,12 @@ a{
   margin: 0.25rem;
 }
 
+.navButtons{
+  *{
+    color: white;
+  }
+}
+
 .list {
   width: 250px;
 }
@@ -246,8 +252,9 @@ a{
   height: 6rem;
 }
 
-.cardLink {
+.link {
   text-decoration: none;
+  color: inherit;
   div{
     transition: 0.25s all ease-in-out;
   }

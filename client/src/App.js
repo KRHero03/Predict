@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer'
 import Home from './routes/Home';
 import Friends from './routes/Friends';
+import Search from './routes/Search';
 import PlacedBets from './routes/PlacedBets';
 import OurStory from './routes/OurStory';
 
@@ -53,7 +54,8 @@ function App() {
               <Route exact path='/' component={Home} />
               {/* <Route path='/myclass/:id' render={(props) => <MyClasses {...props} />} />
             <Route path='/exams/:examCode'render={props=><Exam {...props}/>}/> */}
-              <Route exact path='/friends' component={Friends} />
+              <Route path='/friends/:id' render={(props) => <Friends {...props} />} />
+              <Route path='/search/:id' render={(props) => <Search {...props} />} />
               <Route exact path='/bets' component={PlacedBets} />
               <Route path='/ourstory' component={OurStory} />
               <Route component={Home} />
