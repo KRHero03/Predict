@@ -3,7 +3,6 @@ import { AccountCircle,Group, ExitToApp, GroupWork, Help,MonetizationOn, Home,Br
 import { Component } from "react"
 import { withRouter } from 'react-router-dom'
 import policy from '../policy'
-import axios from 'axios'
 var template = { __html: policy };
 
 

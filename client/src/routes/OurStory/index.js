@@ -1,7 +1,4 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import Divider from "@material-ui/core/Divider";
-import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 import { Typography, Card } from "@material-ui/core";
 import MetaTags from 'react-meta-tags'

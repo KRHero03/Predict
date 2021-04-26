@@ -3,8 +3,8 @@ import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card, Fab, CircularProgress, Box, Link, Tabs, Tab, CardHeader, CardActions, CardContent, Avatar, Button, IconButton, Tooltip, InputBase } from "@material-ui/core";
-import { PlayArrow, Search, MoreVert } from '@material-ui/icons';
+import { Typography, Card,  Box,  Tabs, Tab, CardContent, InputBase } from "@material-ui/core";
+import { Search } from '@material-ui/icons';
 import Logo from "../../logo.png";
 import axios from 'axios'
 import UserView from '../../components/UserView'

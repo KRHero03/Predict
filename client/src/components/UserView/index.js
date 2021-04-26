@@ -1,12 +1,8 @@
 import React, { Component } from 'react'
 import { Link, IconButton, Tooltip, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress } from '@material-ui/core'
-import useScrollTrigger from '@material-ui/core/useScrollTrigger'
-import Logo from '../../logo.png'
-import { Menu, Search, AddCircle, Delete, AddCircleOutline, DeleteOutline, RemoveCircleOutline } from '@material-ui/icons'
+import { AddCircle, Delete, AddCircleOutline, DeleteOutline, RemoveCircleOutline } from '@material-ui/icons'
 import { Skeleton } from '@material-ui/lab'
 import { withRouter } from "react-router"
-import GuestLinks from '../GuestLinks'
-import SignInLinks from '../SignInLinks'
 import axios from 'axios'
 
 

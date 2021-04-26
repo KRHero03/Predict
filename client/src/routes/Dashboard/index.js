@@ -3,10 +3,12 @@ import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card, Fab, CircularProgress, Box, Link, CardHeader, CardActions, CardContent, Avatar, Button, IconButton, Tooltip } from "@material-ui/core";
-import { PlayArrow } from '@material-ui/icons';
+import MatchView from '../../components/MatchView'
+import { Typography, Card, Box, CardContent, InputBase } from "@material-ui/core";
+import { Search } from '@material-ui/icons';
 import Logo from "../../logo.png";
 import axios from 'axios'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
 class Dashboard extends Component {
   constructor(props) {
@@ -16,11 +18,15 @@ class Dashboard extends Component {
       isAuthenticated: false,
       isUserDataLoading: true,
       timestamp: new Date().getTime(),
+      skip: 0,
+      matches: [],
+      hasMore: true,
+      search: '',
     };
   }
   async componentDidMount() {
     const response = await axios.get('/api/current_user')
-    if (!response.data){
+    if (!response.data) {
       this.props.history.push('/')
       return
     }
@@ -29,12 +35,42 @@ class Dashboard extends Component {
       user: response.data
     })
 
-    const matchResponse = await axios.post('/api/get_recent_matches')
+    const matchResponse = await axios.post('/api/get_recent_matches', { skip: this.state.skip })
+    if (!matchResponse.data.success) {
+      this.props.history.push('/')
+      return
+    }
+    const matchData = matchResponse.data.result
+    console.log(matchData)
     this.setState({
-      isUserDataLoading: false
+      isUserDataLoading: false,
+      skip: matchResponse.length < 10 ? this.state.skip : this.state.skip + 10,
+      hasMore: matchResponse.length < 10 ? false : true,
+      matches: matchData
     })
   }
 
+  loadMoreMatches = async () => {
+    const matchResponse = await axios.post('/api/get_recent_matches', { skip: this.state.skip })
+    if (!matchResponse.data.success) {
+      this.props.history.push('/')
+      return
+    }
+    const matchData = matchResponse.data.result
+    console.log(matchData)
+    this.setState({
+      isUserDataLoading: false,
+      skip: matchResponse.length < 10 ? this.state.skip : this.state.skip + 10,
+      hasMore: matchResponse.length < 10 ? false : true,
+      matches: [...this.state.matches, ...matchData]
+    })
+  }
+
+  handleSearchVal = (e) => {
+    this.setState({
+      search: e.target.value
+    })
+  }
 
   render() {
     if (this.state.isUserDataLoading)
@@ -58,52 +94,57 @@ class Dashboard extends Component {
             content="Predict"
           />
           <meta id="og-image" property="og:image" content={Logo} />
-        </MetaTags>
-        <Grid item className='gridItem' xs={12}>
+        </MetaTags><Grid item className='gridItem' xs={12}>
           <Card variant='outlined'>
             <CardContent>
-              <Typography variant='body' color='textSecondary'>
-                Match ID
-              </Typography>
-              <Box display='flex' alignItems='center' justifyContent='center' style={{textAlign:'center'}}>
-                <Grid style={{ margin: 10 }}>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Avatar src={"TeamURL 1"} />
-                  </Grid>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Typography variant='h5'>Team Name 1</Typography>
-                  </Grid>
-                </Grid>
-                <Typography variant='h3' style={{ margin: 10 }}>VS</Typography>
-                <Grid style={{ margin: 10 }}>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Avatar src={"TeamURL 2"} />
-                  </Grid>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Typography variant='h5'>Team Name 2</Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-              <Box display='flex' alignItems='center' justifyContent='center'>
-                <Typography variant='body' color='textSecondary'>
-                  Match Time
+              <Box display='flex' justifyContent='space-between' alignItems='center'>
+
+                <Typography variant='h5'>
+                  Recent Matches
                 </Typography>
+                <div className='search'>
+                  <div className='searchIcon'>
+                    <Search />
+                  </div>
+                  <InputBase
+                    placeholder="Search Matches..."
+                    className='inputBase'
+                    inputProps={{ 'aria-label': 'search' }}
+                    onChange={this.handleSearchVal}
+                  />
+                </div>
+
               </Box>
-              <Box display='flex' alignItems='center' justifyContent='center'>
-                <Typography variant='body' color='textSecondary'>
-                  Odds
-                </Typography>
-              </Box>
+
             </CardContent>
-            <CardActions>
-              <Tooltip title="Place Bet" placement='bottom'>
-                <IconButton aria-label='Place Bet'>
-                  <PlayArrow />
-                </IconButton>
-              </Tooltip>
-            </CardActions>
           </Card>
         </Grid>
+        <InfiniteScroll
+          dataLength={this.state.matches.length}
+          next={this.loadMoreMatches}
+          hasMore={this.state.hasMore}
+          endMessage={
+            <Grid item xs={12} className='gridItem'>
+              <Card variant='outlined'>
+                <CardContent>
+                  <Typography variant='caption' color='textSecondary'>
+                    This is it. You're done.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>}
+        >
+          {this.state.matches.map((match) => {
+            if (match.teamHome.name.toLowerCase().includes(this.state.search.toLowerCase()) || match.teamAway.name.toLowerCase().includes(this.state.search.toLowerCase()) || match.league.name.toLowerCase().includes(this.state.search.toLowerCase()) || match.venue.toLowerCase().includes(this.state.search.toLowerCase()))
+              return (
+                <Grid item className='gridItem' xs={12}>
+                  <MatchView matchObj={match} />
+                </Grid>
+              )
+            return null
+          })}
+        </InfiniteScroll>
+
       </Grid >
     );
   }
