@@ -7,6 +7,8 @@ import Footer from './components/Footer'
 import Home from './routes/Home';
 import Friends from './routes/Friends';
 import Search from './routes/Search';
+import Profile from './routes/Profile';
+import Rewards from './routes/Rewards';
 import PlacedBets from './routes/PlacedBets';
 import OurStory from './routes/OurStory';
 
@@ -56,7 +58,9 @@ function App() {
             <Route path='/exams/:examCode'render={props=><Exam {...props}/>}/> */}
               <Route path='/friends/:id' render={(props) => <Friends {...props} />} />
               <Route path='/search/:id' render={(props) => <Search {...props} />} />
+              <Route path='/profile/:id' render={(props) => <Profile {...props} />} />
               <Route exact path='/bets' component={PlacedBets} />
+              <Route exact path='/rewards' component={Rewards} />
               <Route path='/ourstory' component={OurStory} />
               <Route component={Home} />
             </Switch>

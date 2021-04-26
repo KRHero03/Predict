@@ -68,7 +68,7 @@ class SignInLinks extends Component {
             <ListItemIcon> <Home /></ListItemIcon>
             <ListItemText primary="Home" />
           </ListItem>
-          <ListItem button key="Profile" component="a" href="/">
+          <ListItem button key="Profile" component="a" href={'/profile/'+this.state.user._id}>
             <ListItemIcon> <AccountCircle /></ListItemIcon>
             <ListItemText primary="Profile" />
           </ListItem>
@@ -77,11 +77,11 @@ class SignInLinks extends Component {
             <ListItemIcon> <Group /></ListItemIcon>
             <ListItemText primary="Friends" />
           </ListItem>
-          <ListItem button key="Placed Bets" component="a" href="/bets">
+          <ListItem button key="Prediction Battles" component="a" href="/bets">
             <ListItemIcon> <MonetizationOn /></ListItemIcon>
-            <ListItemText primary="Placed Bets" />
+            <ListItemText primary="Prediction Battles" />
           </ListItem>
-          <ListItem button key="Rewards Store" component="a" href="/">
+          <ListItem button key="Rewards Store" component="a" href="/rewards">
             <ListItemIcon> <Store /></ListItemIcon>
             <ListItemText primary="Rewards Store" />
           </ListItem>

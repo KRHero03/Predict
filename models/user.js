@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const {RewardsSchema} = require("./rewards");
 const Schema = mongoose.Schema;
 
 // Create the Schema
@@ -21,6 +20,15 @@ const UserSchema = new Schema({
   friends: [{
     type:String,
   }],
+  referralCode: {
+    type: String,
+    required: true,
+    default: '',
+  },
+  usedReferralCode: {
+    type: String,
+    default: '',
+  },
   photo: {
     type: String,
     required: true,
@@ -31,9 +39,6 @@ const UserSchema = new Schema({
     type: Number,
     default: 100,
   },
-  rewardsPurchased: [
-    RewardsSchema,
-  ],
 });
 
 module.exports = User = mongoose.model("user", UserSchema);

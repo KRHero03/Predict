@@ -17,6 +17,17 @@ a{
   }
 }
 
+.giftCode{
+  background-color: #f50057;
+  color: #f50057;
+  padding: 5px;
+  transition: 0.25s all ease-in-out;
+  &:hover{
+    color: white;
+    cursor: pointer;
+  }
+}
+
 .search {
   position:relative;
   border-radius: 4px;
@@ -146,6 +157,11 @@ a{
 .drawerPhoto {
   width: 4rem;
   height: 4rem;
+}
+
+.largeProfilePhoto {
+  width: 8rem;
+  height: 8rem;
 }
 
 .block {
