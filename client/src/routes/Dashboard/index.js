@@ -14,7 +14,8 @@ class Dashboard extends Component {
     this.state = {
       user: null,
       isAuthenticated: false,
-      isUserDataLoading: false,
+      isUserDataLoading: true,
+      timestamp: new Date().getTime(),
     };
   }
   async componentDidMount() {
@@ -25,8 +26,12 @@ class Dashboard extends Component {
     }
     this.setState({
       isAuthenticated: true,
-      isLoading: false,
       user: response.data
+    })
+
+    const matchResponse = await axios.post('/api/get_recent_matches')
+    this.setState({
+      isUserDataLoading: false
     })
   }
 

@@ -10,7 +10,7 @@ const TransactionSchema = new Schema({
     type: String,
     required: true
   },
-    rewardID: {
+  rewardID: {
     type: String,
     required: true
   },

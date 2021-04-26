@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card, Fab, CircularProgress, Box, CardHeader, CardActions, CardContent, Avatar, Button, IconButton, Tooltip } from "@material-ui/core"
+import { Typography, Card, Box, CardHeader,CardContent, } from "@material-ui/core"
 import RewardView from '../../components/RewardView'
 import Logo from "../../logo.png";
 import axios from 'axios'

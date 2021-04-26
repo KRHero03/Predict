@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const path = require('path')
 require('dotenv').config({ path: path.join(__dirname+"/config/", '.env') })
 const {env,dev,production}  = require('./config/keys.js');
+const {fetchMatchFixtures} = require('./services/match_service')
 
 
 const app = express();
@@ -59,6 +60,7 @@ require("./routes/api/users.js")(app);
 require("./routes/api/rewards.js")(app);
 require("./routes/api/challenge.js")(app);
 
+fetchMatchFixtures()
 // Server static assets if in production
 if (env === "production") {
   // Set static folder

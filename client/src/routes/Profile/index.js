@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card, Fab, Tabs, Tab, CircularProgress, Box, Link, TextField, CardActions, CardContent, Avatar, Button, IconButton, Tooltip, Dialog } from "@material-ui/core";
+import { Typography, Card,Tabs, Tab, CircularProgress, Box, Link, TextField, CardContent, Avatar,  IconButton, Tooltip, Dialog } from "@material-ui/core";
 import { AddCircle, RemoveCircleOutline, AddCircleOutline, Delete, DeleteOutline, Send } from '@material-ui/icons';
 import Logo from "../../logo.png";
 import axios from 'axios'
