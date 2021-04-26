@@ -16,6 +16,11 @@ const RewardsSchema = new Schema({
     default:
       "https://img.freepik.com/free-vector/loyalty-program-getting-gift-reward-flat-illustration_169533-11.jpg?size=626&ext=jpg"
   },
+  quantity: {
+    type: Number,
+    required: true,
+    default: 0
+  }
 });
 
 module.exports.Rewards = mongoose.model("rewards", RewardsSchema);

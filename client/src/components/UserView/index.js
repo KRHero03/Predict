@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { AppBar, IconButton, Tooltip, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress } from '@material-ui/core'
+import { Link, IconButton, Tooltip, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress } from '@material-ui/core'
 import useScrollTrigger from '@material-ui/core/useScrollTrigger'
 import Logo from '../../logo.png'
 import { Menu, Search, AddCircle, Delete, AddCircleOutline, DeleteOutline, RemoveCircleOutline } from '@material-ui/icons'
@@ -216,7 +216,7 @@ class UserView extends Component {
           avatar={
             <Avatar aria-label="profile-photo" src={this.state.user.photo} onClick={this.toggleModalOpen} />
           }
-          title={this.state.user.name}
+          title={<Link href={'/profile/'+this.state.user._id} className='link' component='a'>{this.state.user.name}</Link>}
         />
         <CardContent>
           <Box display='flex' alignItems='center' justifyContent='space-between'>

@@ -34,11 +34,13 @@ passport.use(
         if (existingUser) {
           done(null, existingUser);
         } else {
+
           new User({
-            //googleId: profile.id,
+            referralCode:Math.random().toString(36).slice(6).toUpperCase(),
             name: profile.displayName,
             email: profile.emails[0].value,
-            photo: profile.photos[0].value.split("?")[0]
+            photo: profile.photos[0].value.split("?")[0],
+
           })
             .save()
             .then(user => done(null, user));
