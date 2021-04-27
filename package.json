@@ -9,8 +9,7 @@
     "server-install": "npm install",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "heroku-postbuild": "npm run client-install && npm run build --prefix client"
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "Team Predict-WebApp",
   "license": "ISC",
