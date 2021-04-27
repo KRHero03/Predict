@@ -1,19 +1,23 @@
 import React, { Component } from 'react'
 import { IconButton, Tooltip, Collapse, CardActions, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent } from '@material-ui/core'
-import { PlayArrow, ExpandMore } from '@material-ui/icons'
+import { Delete, ExpandMore, RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons'
 import { withRouter } from "react-router"
 
-class MatchView extends Component {
+class ChallengeView extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
       match: this.props.matchObj,
+      otherUser: this.props.otherUser,
+      user: this.props.user,
+      challenge: this.props.challenge,
       isLeagueModalOpen: false,
       isTeamHomeModalOpen: false,
       isTeamAwayModalOpen: false,
       expanded: false,
     }
+    console.log(this.state)
   }
 
   async componentDidMount() {
@@ -51,6 +55,10 @@ class MatchView extends Component {
   createPredictionBattle = () => {
     this.props.history.push('/create/' + this.state.match.matchID)
   }
+  hasMatchStarted = () => {
+    const d = new Date().getTime()
+    return d > this.state.match.timestamp
+  }
 
 
   render() {
@@ -77,10 +85,13 @@ class MatchView extends Component {
                 <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
                   <Typography variant='h5'>{this.state.match.teamHome.score ? this.state.match.teamHome.score : 0}</Typography>
                 </Grid>
+                <Grid item xs={12} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Avatar src={this.state.challenge.userID1 === this.state.user._id ? this.state.user.photo : this.state.otherUser.photo} />
+                  <Typography style={{ marginLeft: 5 }}>{this.state.challenge.userID1 === this.state.user._id ? 'You' : this.state.otherUser.name} </Typography>
+                </Grid>
               </Grid>
-
               <Grid style={{ margin: 10, width: 150 }}>
-              <Typography variant='h3' style={{ margin: 10 }}>VS</Typography>
+                <Typography variant='h3' style={{ margin: 10 }}>VS</Typography>
               </Grid>
               <Grid style={{ margin: 10, width: 150 }}>
                 <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
@@ -92,7 +103,41 @@ class MatchView extends Component {
                 <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
                   <Typography variant='h5'>{this.state.match.teamAway.score ? this.state.match.teamAway.score : 0}</Typography>
                 </Grid>
+                <Grid item xs={12} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Avatar src={this.state.challenge.userID2 === this.state.user._id ? this.state.user.photo : this.state.otherUser.photo} />
+                  <Typography style={{ marginLeft: 5 }}>{(this.state.challenge.userID2 === this.state.user._id) ? 'You' : this.state.otherUser.name} </Typography>
+                </Grid>
               </Grid>
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box display='flex' alignItems='center' justifyContent='center'>
+              <Typography>{(this.state.challenge.sentBy === 'home' && this.state.challenge.userID1 === this.state.user._id) || (this.state.challenge.sentBy === 'away' && this.state.challenge.userID2 === this.state.user._id) ? 'Sent by You' : 'Sent by ' + this.state.otherUser.name}</Typography>
+            </Box>
+            <Box display='flex' alignItems='center' justifyContent='center'>
+              <Typography>{'Battle Bet Amount: ' + this.state.challenge.betAmount + ' P Coins'}</Typography>
+            </Box>
+            {
+              this.state.challenge.status === 'Match Finished'
+                ?
+                <Box display='flex' alignItems='center' justifyContent='center'>
+                  {
+                    (this.state.match.winner==='home' && this.state.challenge.userID1===this.state.user._id) || (this.state.match.winner==='away' && this.state.challenge.userID2===this.state.user._id) 
+                    ?
+                    <Typography>{'Congratulations! You won the Prediction Battle!'}</Typography>
+                    :
+                    (this.state.match.winner==='away' && this.state.challenge.userID1===this.state.user._id) || (this.state.match.winner==='home' && this.state.challenge.userID2===this.state.user._id) 
+                    ?
+                    <Typography>{'Sorry! You lost the Prediction Battle!'}</Typography>
+                    :
+                    <Typography>{'The match was either a draw or abandoned due to unfavourable conditions!'}</Typography>
+                  }
+                </Box>
+                :
+                null
+            }
+            <Box display='flex' >
+              <Typography variant='caption' color='textSecondary'>{'Please note that updates regarding Prediction Battle may take time to load. In cases where a Winner is not decided, P Coins of both the Users will be restored! Have fun @ Predict!'}</Typography>
             </Box>
           </Grid>
         </CardContent>
@@ -107,17 +152,63 @@ class MatchView extends Component {
             </IconButton>
           </Tooltip>
           {
-            this.state.match.status === 'Not Started'
+            this.state.challenge.status === 'Match Finished'
               ?
-              <Tooltip title='Create Prediction Battle'>
-                <IconButton
-                  onClick={this.createPredictionBattle}
-                >
-                  <PlayArrow />
-                </IconButton>
-              </Tooltip>
-              :
               null
+              :
+              this.state.challenge.accepted
+                ?
+
+                <Tooltip title='Withdraw Challenge'>
+                  <IconButton
+                    onClick={this.handleExpandClick}
+                    aria-expanded={this.state.expanded}
+                    aria-label="Withdraw Challenge"
+                  >
+                    <ExpandMore />
+                  </IconButton>
+                </Tooltip>
+                :
+                (this.state.challenge.sentBy === 'home' && this.state.challenge.userID1 === this.state.user._id) || (this.state.challenge.sentBy === 'away' && this.state.challenge.userID2 === this.state.user._id)
+                  ?
+                  (this.hasMatchStarted()
+                    ?
+                    null
+                    :
+                    <Tooltip title='Withdraw Challenge'>
+                      <IconButton
+                        onClick={this.handleExpandClick}
+                        aria-expanded={this.state.expanded}
+                        aria-label="Withdraw Challenge"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>)
+                  :
+                  <Box display='flex' alignItems='center'>
+
+                    <Tooltip title='Accept Challenge'>
+                      <IconButton
+                        onClick={this.handleExpandClick}
+                        aria-expanded={this.state.expanded}
+                        aria-label="Accept Challenge"
+                      >
+                        <AddCircleOutline />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title='Delete Challenge'>
+                      <IconButton
+                        onClick={this.handleExpandClick}
+                        aria-expanded={this.state.expanded}
+                        aria-label="Delete Challenge"
+                      >
+                        <RemoveCircleOutline />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+
+
           }
         </CardActions>
         <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
@@ -184,4 +275,4 @@ class MatchView extends Component {
 
 }
 
-export default withRouter(MatchView);
+export default withRouter(ChallengeView);

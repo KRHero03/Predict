@@ -77,18 +77,7 @@ const MatchSchema = new Schema({
         default: 'Unknown',
     },
     challenges: [{
-        userID1: {
-            type: String,
-            default: '',
-        },
-        userID2: {
-            type: String,
-            default: '',
-        },
-        betAmount: {
-            type: Number,
-            default: '',
-        }
+        type: String,
     }]
 });
 

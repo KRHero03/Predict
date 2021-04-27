@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer'
 import Home from './routes/Home';
 import Friends from './routes/Friends';
+import Create from './routes/Create';
 import Search from './routes/Search';
 import Profile from './routes/Profile';
 import Rewards from './routes/Rewards';
@@ -59,7 +60,8 @@ function App() {
               <Route path='/friends/:id' render={(props) => <Friends {...props} />} />
               <Route path='/search/:id' render={(props) => <Search {...props} />} />
               <Route path='/profile/:id' render={(props) => <Profile {...props} />} />
-              <Route exact path='/bets' component={PlacedBets} />
+              <Route path='/create/:id' render={(props) => <Create {...props} />} />
+              <Route path='/bets/:id' render={(props) => <PlacedBets {...props} />} />
               <Route exact path='/rewards' component={Rewards} />
               <Route path='/ourstory' component={OurStory} />
               <Route component={Home} />

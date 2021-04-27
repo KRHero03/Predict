@@ -37,6 +37,7 @@ class Friends extends Component {
 
     }
     const response = await axios.get('/api/current_user')
+    
     if (!response.data) {
       this.props.history.push('/')
       return

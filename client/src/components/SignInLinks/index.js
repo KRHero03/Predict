@@ -76,7 +76,7 @@ class SignInLinks extends Component {
             <ListItemIcon> <Group /></ListItemIcon>
             <ListItemText primary="Friends" />
           </ListItem>
-          <ListItem button key="Prediction Battles" component="a" href="/bets">
+          <ListItem button key="Prediction Battles" component="a" href="/bets/0">
             <ListItemIcon> <MonetizationOn /></ListItemIcon>
             <ListItemText primary="Prediction Battles" />
           </ListItem>

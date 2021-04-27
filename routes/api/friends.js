@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const friendsModel = require("../../models/friends");
 const users = require("../../models/user");
 module.exports = app => {
 
@@ -103,37 +102,6 @@ module.exports = app => {
 
 
 
-    
-
-    app.post('/api/battle_history', async (req, res) => {
-        try{
-            
-            const userID1Param = req.user._id
-            const userID2Param = req.body.userID2
-
-            const response = await friendsModel.find({ $and: [{ userID1: userID1Param }, { userID2: userID2Param }] }).populate('challenge._id').select('battleHistory')
-
-            res.send(response)
-        }catch(e){
-            console.log(e)
-            res.send([])
-        }
-    })
-
-    app.post('/api/battle_stats', async (req, res) => {
-        try{
-            
-            const userID1Param = req.user._id
-            const userID2Param = req.body.userID2
-
-            const response = await friendsModel.find({ $and: [{ userID1: userID1Param }, { userID2: userID2Param }] }).select('battleWon battleLost battleDraw')
-
-            res.send(response)
-        }catch(e){
-            console.log(e)
-            res.send("")
-        }
-    })
 
 
 }

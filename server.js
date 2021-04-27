@@ -17,9 +17,11 @@ app.use(bodyParser.json())
 
 
 require("./models/user.js");
-require("./models/friends.js");
 require("./models/challenge.js");
 require("./models/rewards.js");
+require("./models/match.js");
+require("./models/server_variables.js");
+require("./models/transactions.js");
 
 app.use(
   cookieSession({

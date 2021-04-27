@@ -1,6 +1,7 @@
 const Match = require('../models/match')
 const ServerVars = require('../models/server_variables')
 const User = require('../models/user')
+const Challenge = require('../models/challenge')
 const { env, dev, production } = require('../config/keys')
 var request = require("request");
 
@@ -34,9 +35,9 @@ fetchData = async () => {
     }
   };
   try {
-    const response = await ServerVars.findOne({})
-    if (response !== null) {
-      const lastFetchTimestamp = parseInt(response.fetchLastTimestamp)
+    const serverResponse = await ServerVars.findOne({})
+    if (serverResponse !== null) {
+      const lastFetchTimestamp = parseInt(serverResponse.fetchLastTimestamp)
       let lastDate = new Date(lastFetchTimestamp)
       let lastYear = lastDate.getFullYear()
       let lastMonth = lastDate.getMonth() + 1
@@ -48,10 +49,6 @@ fetchData = async () => {
         console.log('Ignoring Fetch, Data already Fetched!')
         return
       }
-    } else {
-      await new ServerVars({
-        fetchLastTimestamp: d.getTime()
-      }).save()
     }
 
 
@@ -69,6 +66,7 @@ fetchData = async () => {
       await Promise.all(fixtureDetails.map(async (res) => {
         const response = await Match.findOne({ matchID: res.fixture.id })
         if (response) return true
+        if(res.fixture.status.long==='Time to be defined') return true
         await new Match({
           matchID: res.fixture.id,
           referee: res.fixture.referee,
@@ -96,14 +94,19 @@ fetchData = async () => {
           challenges: []
         }).save()
       }))
-      if (response !== null) {
-        response.set({ fetchLastTimestamp: d.getTime() })
-        await response.save()
+      if (serverResponse !== null) {
+        serverResponse.set({ fetchLastTimestamp: d.getTime() })
+        await serverResponse.save()
+      } else {
+        await new ServerVars({
+          fetchLastTimestamp: d.getTime()
+        }).save()
       }
     });
-
+    
 
   } catch (e) {
+    console.log(e)
   }
 }
 
@@ -117,9 +120,11 @@ setTimers = async () => {
     d.setTime(d.getTime() + 1000 * 60 * 60 * 5)
     const fetchTimestamp = d.getTime()
     const curDate = new Date().getTime()
-    const diff = fetchTimestamp - curDate
+    const diff = Math.max(1000, fetchTimestamp - curDate)
+
     setTimerForMatch(id, diff)
   })
+  console.log('Completed Setting timers')
 }
 
 setTimerForMatch = (id, diff) => {
@@ -159,10 +164,14 @@ setTimerForMatch = (id, diff) => {
 
         const challenges = matchResponse.challenges
         if (winner === 'nil') {
-          await Promise.all(challenges.map(async (challenge) => {
-            const userID1 = challenges.userID1
-            const userID2 = challenges.userID2
-            const amount = challenges.betAmount
+          await Promise.all(challenges.map(async (id) => {
+
+            const challenge = await Challenge.findOne({ _id: id })
+            const userID1 = challenge.userID1
+            const userID2 = challenge.userID2
+            const amount = challenge.betAmount
+            challenge.set({ status: 'Match Finished', winner: 'nil' })
+            await challenge.save()
             const user1 = await User.findOne({ _id: userID1 })
             user1.set({ rewardCoins: user1.rewardCoins + amount })
             user1.save()
@@ -171,20 +180,33 @@ setTimerForMatch = (id, diff) => {
             user2.save()
           }))
         } else if (winner === 'home') {
-          await Promise.all(challenges.map(async (challenge) => {
-            const userID1 = challenges.userID1
-            const amount = challenges.betAmount
+          await Promise.all(challenges.map(async (id) => {
+
+            const challenge = await Challenge.findOne({ _id: id })
+            const userID1 = challenge.userID1
+            const amount = challenge.betAmount
+            challenge.set({ status: 'Match Finished', winner: 'home' })
+            await challenge.save()
             const user1 = await User.findOne({ _id: userID1 })
             user1.set({ rewardCoins: user1.rewardCoins + 2 * amount })
-            user1.save()
+            await user1.save()
+            const referredUser = await User.findOne({ referralCode: user1.usedReferralCode })
+            referredUser.set({ rewardCoins: referredUser.rewardCoins + Math.trunc(2 * 0.1 * amount) })
+            await referredUser.save()
           }))
         } else if (winner === 'away') {
-          await Promise.all(challenges.map(async (challenge) => {
-            const userID2 = challenges.userID2
-            const amount = challenges.betAmount
+          await Promise.all(challenges.map(async (id) => {
+            const challenge = await Challenge.findOne({ _id: id })
+            const userID2 = challenge.userID2
+            const amount = challenge.betAmount
+            challenge.set({ status: 'Match Finished', winner: 'away' })
+            await challenge.save()
             const user2 = await User.findOne({ _id: userID2 })
             user2.set({ rewardCoins: user2.rewardCoins + 2 * amount })
             user2.save()
+            const referredUser = await User.findOne({ referralCode: user2.usedReferralCode })
+            referredUser.set({ rewardCoins: referredUser.rewardCoins + Math.trunc(2 * 0.1 * amount) })
+            await referredUser.save()
           }))
 
         }

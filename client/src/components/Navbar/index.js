@@ -36,7 +36,6 @@ class Navbar extends Component {
 
   async componentDidMount() {
     const response = await axios.get('/api/current_user')
-    console.log(response)
     if (!response.data) {
       this.setState({
         isLoading: false

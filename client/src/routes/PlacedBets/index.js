@@ -3,10 +3,11 @@ import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card, Box, CardActions, CardContent, Avatar, IconButton, Tooltip } from "@material-ui/core";
-import { Delete } from '@material-ui/icons';
+import { Typography, Card, Box, Tabs, Tab, CardContent, InputBase, Dialog, CardHeader, CardActions, Avatar, IconButton, Tooltip, Collapse } from "@material-ui/core";
+import { Search, PlayArrow, ExpandMore } from '@material-ui/icons';
 import Logo from "../../logo.png";
 import axios from 'axios'
+import ChallengeView from '../../components/ChallengeView'
 
 class PlacedBets extends Component {
   constructor(props) {
@@ -14,23 +15,79 @@ class PlacedBets extends Component {
     this.state = {
       user: null,
       isAuthenticated: false,
-      isUserDataLoading: false,
+      isUserDataLoading: true,
+      tabValue: 0,
+      onGoingChallenges: [],
+      pendingChallenges: [],
+      pastChallenges: [],
+      search: ''
     };
   }
-  
+
   async componentDidMount() {
+    try {
+      const idx = parseInt(this.props.match.params.id)
+      if (idx >= 0 || idx <= 2) {
+        this.setState({
+          tabValue: idx
+        })
+      }
+    } catch (e) {
+
+    }
     const response = await axios.get('/api/current_user')
-    if (!response.data){
+    if (!response.data) {
       this.props.history.push('/')
       return
     }
     this.setState({
-      isAuthenticated: true,
-      isLoading: false,
       user: response.data
+    })
+    const challengeResponse = await axios.post('/api/get_challenges')
+    if (!challengeResponse.data.success) {
+      this.props.history.push('/')
+      return
+    }
+    let onGoingChallenges = [], pendingChallenges = [], pastChallenges = []
+
+    challengeResponse.data.result.forEach((obj) => {
+      const challenge = obj.challenge
+      const match = obj.match
+      if (challenge.accepted === false) {
+        pendingChallenges.push(obj)
+        return
+      }
+      if (match.status === 'Not Started') {
+        onGoingChallenges.push(obj)
+        return
+      }
+      pastChallenges.push(obj)
+    })
+
+    this.setState({
+      onGoingChallenges: onGoingChallenges,
+      pendingChallenges: pendingChallenges,
+      pastChallenges: pastChallenges,
+      isUserDataLoading: false
+    })
+    console.log(this.state)
+
+  }
+  handleTabChange = (event, value) => {
+    this.setState({
+      tabValue: value
     })
   }
 
+  handleSearchVal = (e) => {
+    this.setState({
+      search: e.target.value
+    })
+  }
+
+  checkDisplayConditions = (challenge) => {
+    return challenge.otherUser.name.includes(this.state.search) || challenge.match.teamHome.name.includes(this.state.search) || challenge.match.teamAway.name.includes(this.state.search) || challenge.match.league.name.includes(this.state.search)
+  }
 
   render() {
     if (this.state.isUserDataLoading)
@@ -42,7 +99,7 @@ class PlacedBets extends Component {
     return (
       <Grid className="home">
         <MetaTags>
-          <title>Dashboard | Predict</title>
+          <title>Prediction Battles | Predict</title>
           <meta
             id="meta-description"
             name="description"
@@ -54,88 +111,94 @@ class PlacedBets extends Component {
             content="Predict"
           />
           <meta id="og-image" property="og:image" content={Logo} />
-        </MetaTags>  <Grid item className='gridItem' xs={12}>
+        </MetaTags>
+        <Grid item className='gridItem' xs={12}>
           <Card variant='outlined'>
             <CardContent>
               <Box display='flex' justifyContent='space-between'>
 
                 <Typography variant='h5'>
-                  Your Predictions
+                  Your Prediction Battles
                 </Typography>
+                <div className='search'>
+                  <div className='searchIcon'>
+                    <Search />
+                  </div>
+                  <InputBase
+                    placeholder="Search Prediction Battles..."
+                    className='inputBase'
+                    inputProps={{ 'aria-label': 'search' }}
+                    onChange={this.handleSearchVal}
+                  />
+                </div>
+
               </Box>
 
             </CardContent>
           </Card>
         </Grid>
         <Grid item className='gridItem' xs={12}>
-          <Card variant='outlined'>
-            <CardContent>
-              <Typography variant='body' color='textSecondary'>
-                Match ID
-              </Typography>
-              <Box display='flex' alignItems='center' justifyContent='center' style={{ textAlign: 'center' }}>
-                <Grid style={{ margin: 10 }}>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Avatar src={"TeamURL 1"} />
-                  </Grid>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Typography variant='h5'>Team Name 1</Typography>
-                  </Grid>
-                </Grid>
-                <Typography variant='h3' style={{ margin: 10 }}>VS</Typography>
-                <Grid style={{ margin: 10 }}>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Avatar src={"TeamURL 2"} />
-                  </Grid>
-                  <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Typography variant='h5'>Team Name 2</Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-              <Box display='flex' alignItems='center' justifyContent='center'>
-                <Typography variant='body' color='textSecondary'>
-                  Match Time
-                </Typography>
-              </Box>
-              <Box display='flex' alignItems='center' justifyContent='center'>
-                {
-                  false
-                    ?
-                    <Typography variant='body' color='textSecondary'>
-                      Odds: {0}
-                    </Typography>
-                    :
-                    <Typography variant='body' color='textSecondary'>
-                      {"Team 1"} won!
-                    </Typography>
-                }
-              </Box>
-              <Box display='flex' alignItems='center' justifyContent='center'>
-                <Typography variant='body' color='textSecondary'>
-                  You predicted {"Team 1"}!
-                </Typography>
-              </Box>
-              {
-                true
-                  ?
-                  <Box display='flex' alignItems='center' justifyContent='center'>
-                    <Typography variant='body'>
-                      Reward Obtained : {0} P Coins
-                    </Typography>
-                  </Box>
-                  :
-                  null
-              }
-            </CardContent>
-            <CardActions>
-              <Tooltip title="Remove Bet" placement='bottom'>
-                <IconButton aria-label='Remove Bet'>
-                  <Delete />
-                </IconButton>
-              </Tooltip>
-            </CardActions>
-          </Card>
+          <Grid item xs={12}>
+            <Card variant='outlined'>
+              <Tabs
+                value={this.state.tabValue}
+                onChange={this.handleTabChange}
+                indicatorColor="secondary"
+                textColor="secondary"
+                centered
+              >
+                <Tab label="Ongoing Battles" />
+                <Tab label="Pending Battle Requests" />
+                <Tab label="Past Battles" />
+              </Tabs>
+            </Card>
+          </Grid>
         </Grid>
+        {
+          this.state.tabValue === 0
+            ?
+            <Grid>
+              {this.state.onGoingChallenges.map((challenge) => {
+                if (this.checkDisplayConditions(challenge))
+                  return (
+                    <Grid item xs={12}>
+                      <Card variant='outlined'>
+                      </Card>
+                    </Grid>
+                  )
+                return null
+              })}
+            </Grid>
+            :
+            this.state.tabValue === 1
+              ?
+              <Grid>
+                {this.state.pendingChallenges.map((challenge) => {
+                  if (this.checkDisplayConditions(challenge))
+                    return (
+                      <Grid item xs={12} className='gridItem'>
+                        <ChallengeView matchObj={challenge.match} challenge={challenge.challenge} otherUser={challenge.otherUser} user={this.state.user} withdrawChallengeCallback={this.withdrawChallenge} acceptChallengeCallback={this.acceptChallenge} deleteChallenge={this.deleteChallenge}/>
+                      </Grid>
+                    )
+                  return null
+                })}
+              </Grid>
+
+              :
+              <Grid>
+                {this.state.pastChallenges.map((challenge) => {
+                  if (this.checkDisplayConditions(challenge))
+                    return (
+                      <Grid item xs={12}>
+                        <Card variant='outlined'>
+                        </Card>
+                      </Grid>
+                    )
+                  return null
+                })}
+              </Grid>
+
+        }
       </Grid >
     );
   }

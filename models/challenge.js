@@ -14,7 +14,26 @@ const ChallengeSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  matchID: {
+    type: Number,
+    required: true,
+  },
+  betAmount: {
+    type: Number,
+    required: true
+  },
+  status: {
+    type: String,
+    default: 'Ongoing',
+  },
+  sentBy: {
+    type: String,
+    required: true,
+  },
+  winner: {
+    type: String,
+    required: true
+  }
 });
 
-module.exports.ChallengeSchema = ChallengeSchema;
-module.exports.Challenge = mongoose.model("challenge", ChallengeSchema);;
+module.exports = Challenge = mongoose.model("challenge", ChallengeSchema);;
