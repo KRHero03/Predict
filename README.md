@@ -1,5 +1,5 @@
 # XPert
-- MERN Stack Article Writing WebApp
-- Demo : https://x-pert.herokuapp.com/
+- MERN Stack Football Fantasy League WebApp
+- Demo : https://predict-webapp.herokuapp.com/
 
 
