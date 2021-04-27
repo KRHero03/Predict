@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { IconButton, Tooltip, Collapse, CardActions, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent } from '@material-ui/core'
+import { IconButton, Tooltip, Collapse, CardActions, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress } from '@material-ui/core'
 import { Delete, ExpandMore, RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons'
 import { withRouter } from "react-router"
+import axios from 'axios'
 
 class ChallengeView extends Component {
 
@@ -15,9 +16,9 @@ class ChallengeView extends Component {
       isLeagueModalOpen: false,
       isTeamHomeModalOpen: false,
       isTeamAwayModalOpen: false,
+      isButtonClicked: false,
       expanded: false,
     }
-    console.log(this.state)
   }
 
   async componentDidMount() {
@@ -58,6 +59,36 @@ class ChallengeView extends Component {
   hasMatchStarted = () => {
     const d = new Date().getTime()
     return d > this.state.match.timestamp
+  }
+
+  withdrawChallenge = async () => {
+
+    this.setState({
+      isButtonClicked: true
+    })
+    try {
+      await axios.post('/api/withdraw_challenge', { id: this.state.challenge._id })
+      this.props.withdrawChallengeCallback(this.state.challenge._id)
+    } catch (e) {
+      this.setState({
+        isButtonClicked: false
+      })
+    }
+  }
+
+  acceptChallenge = async () => {
+
+    this.setState({
+      isButtonClicked: true
+    })
+    try {
+      await axios.post('/api/accept_challenge', { id: this.state.challenge._id })
+      this.props.acceptChallengeCallback(this.state.challenge._id)
+    } catch (e) {
+      this.setState({
+        isButtonClicked: false
+      })
+    }
   }
 
 
@@ -122,15 +153,15 @@ class ChallengeView extends Component {
                 ?
                 <Box display='flex' alignItems='center' justifyContent='center'>
                   {
-                    (this.state.match.winner==='home' && this.state.challenge.userID1===this.state.user._id) || (this.state.match.winner==='away' && this.state.challenge.userID2===this.state.user._id) 
-                    ?
-                    <Typography>{'Congratulations! You won the Prediction Battle!'}</Typography>
-                    :
-                    (this.state.match.winner==='away' && this.state.challenge.userID1===this.state.user._id) || (this.state.match.winner==='home' && this.state.challenge.userID2===this.state.user._id) 
-                    ?
-                    <Typography>{'Sorry! You lost the Prediction Battle!'}</Typography>
-                    :
-                    <Typography>{'The match was either a draw or abandoned due to unfavourable conditions!'}</Typography>
+                    (this.state.match.winner === 'home' && this.state.challenge.userID1 === this.state.user._id) || (this.state.match.winner === 'away' && this.state.challenge.userID2 === this.state.user._id)
+                      ?
+                      <Typography>{'Congratulations! You won the Prediction Battle!'}</Typography>
+                      :
+                      (this.state.match.winner === 'away' && this.state.challenge.userID1 === this.state.user._id) || (this.state.match.winner === 'home' && this.state.challenge.userID2 === this.state.user._id)
+                        ?
+                        <Typography>{'Sorry! You lost the Prediction Battle!'}</Typography>
+                        :
+                        <Typography>{'The match was either a draw or abandoned due to unfavourable conditions!'}</Typography>
                   }
                 </Box>
                 :
@@ -152,44 +183,33 @@ class ChallengeView extends Component {
             </IconButton>
           </Tooltip>
           {
-            this.state.challenge.status === 'Match Finished'
+            this.hasMatchStarted()
               ?
               null
               :
-              this.state.challenge.accepted
+              this.state.isButtonClicked
                 ?
-
-                <Tooltip title='Withdraw Challenge'>
-                  <IconButton
-                    onClick={this.handleExpandClick}
-                    aria-expanded={this.state.expanded}
-                    aria-label="Withdraw Challenge"
-                  >
-                    <ExpandMore />
-                  </IconButton>
-                </Tooltip>
+                <CircularProgress color='secondary' />
                 :
-                (this.state.challenge.sentBy === 'home' && this.state.challenge.userID1 === this.state.user._id) || (this.state.challenge.sentBy === 'away' && this.state.challenge.userID2 === this.state.user._id)
+                this.state.challenge.accepted ||
+                  (this.state.challenge.sentBy === 'home' && this.state.challenge.userID1 === this.state.user._id) || (this.state.challenge.sentBy === 'away' && this.state.challenge.userID2 === this.state.user._id)
                   ?
-                  (this.hasMatchStarted()
-                    ?
-                    null
-                    :
-                    <Tooltip title='Withdraw Challenge'>
-                      <IconButton
-                        onClick={this.handleExpandClick}
-                        aria-expanded={this.state.expanded}
-                        aria-label="Withdraw Challenge"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Tooltip>)
+                  <Tooltip title='Withdraw Challenge'>
+                    <IconButton
+                      onClick={this.withdrawChallenge}
+                      aria-expanded={this.state.expanded}
+                      aria-label="Withdraw Challenge"
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Tooltip>
                   :
+
                   <Box display='flex' alignItems='center'>
 
                     <Tooltip title='Accept Challenge'>
                       <IconButton
-                        onClick={this.handleExpandClick}
+                        onClick={this.acceptChallenge}
                         aria-expanded={this.state.expanded}
                         aria-label="Accept Challenge"
                       >
@@ -199,7 +219,7 @@ class ChallengeView extends Component {
 
                     <Tooltip title='Delete Challenge'>
                       <IconButton
-                        onClick={this.handleExpandClick}
+                        onClick={this.withdrawChallenge}
                         aria-expanded={this.state.expanded}
                         aria-label="Delete Challenge"
                       >

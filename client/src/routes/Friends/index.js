@@ -69,9 +69,35 @@ class Friends extends Component {
       isUserDataLoading: false,
     })
   }
-  handleTabChange = (event, value) => {
+  handleTabChange = async (event, value) => {
     this.setState({
+      friends: [],
+      friendRequests: [],
+      sentFriendRequests: [],
       tabValue: value
+    })
+    const response = await axios.get('/api/current_user')
+    let friends = [], friendRequests = [], sentFriendRequests = []
+    const user = response.data
+    await Promise.all(user.friends.map(async (id) => {
+      const response = await axios.post('/api/user_details', { userID: id })
+      if (!response.data.success) return
+      friends.push(response.data.result)
+    }))
+    await Promise.all(user.friendRequests.map(async (id) => {
+      const response = await axios.post('/api/user_details', { userID: id })
+      if (!response.data.success) return
+      friendRequests.push(response.data.result)
+    }))
+    await Promise.all(user.sentFriendRequests.map(async (id) => {
+      const response = await axios.post('/api/user_details', { userID: id })
+      if (!response.data.success) return
+      sentFriendRequests.push(response.data.result)
+    }))
+    this.setState({
+      friends: friends,
+      friendRequests: friendRequests,
+      sentFriendRequests: sentFriendRequests,
     })
   }
 
@@ -81,12 +107,6 @@ class Friends extends Component {
     })
   }
   friendRequestCallback = (id,accept) => {
-    if(accept){
-      const userObj = this.state.friendRequests.filter((e)=>e._id===id)[0]
-      this.setState({
-        friends: [...this.state.friends,userObj]
-      })
-    }
     this.setState({
       friendRequests: this.state.friendRequests.filter((e)=> e._id!==id)
     })

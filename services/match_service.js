@@ -28,7 +28,7 @@ fetchData = async () => {
   var options = {
     method: 'GET',
     url: 'https://v3.football.api-sports.io/fixtures',
-    qs: { date: nowDate },
+    qs: { date: nowDate,next:50 },
     headers: {
       'x-rapidapi-host': 'v3.football.api-sports.io',
       'x-rapidapi-key': footballApiKey
@@ -120,6 +120,8 @@ setTimers = async () => {
     d.setTime(d.getTime() + 1000 * 60 * 60 * 5)
     const fetchTimestamp = d.getTime()
     const curDate = new Date().getTime()
+    if(curDate-fetchTimestamp>24*60*60*1000)
+      return
     const diff = Math.max(1000, fetchTimestamp - curDate)
 
     setTimerForMatch(id, diff)
@@ -151,14 +153,9 @@ setTimerForMatch = (id, diff) => {
           setTimerForMatch(id, d + 1000 * 60 * 60 * 5)
           return
         }
-        if (!(fixtureDetails.fixture.status.long === 'Match Finished')) {
-          const d = new Date().getTime()
-          setTimerForMatch(id, d + 1000 * 60 * 60 * 5)
-          return
-        }
         const winner = fixtureDetails.teams.home.winner ? 'home' : fixtureDetails.team.home.away ? 'away' : 'nil'
         const matchResponse = await Match.findOne({ matchID: id })
-        matchResponse.set({ winner: winner, status: fixtureDetails.fixture.status.long })
+        matchResponse.set({ winner: winner, status: fixtureDetails.fixture.status.long==='Match Finished'?'Match Finished':'Not Decided (Declared as Draw)' })
         await matchResponse.save()
         if (!matchResponse.challenges) return
 
@@ -170,7 +167,7 @@ setTimerForMatch = (id, diff) => {
             const userID1 = challenge.userID1
             const userID2 = challenge.userID2
             const amount = challenge.betAmount
-            challenge.set({ status: 'Match Finished', winner: 'nil' })
+            challenge.set({ status: fixtureDetails.fixture.status.long==='Match Finished'?'Match Finished':'Not Decided (Declared as Draw)', winner: 'nil' })
             await challenge.save()
             const user1 = await User.findOne({ _id: userID1 })
             user1.set({ rewardCoins: user1.rewardCoins + amount })

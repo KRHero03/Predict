@@ -70,12 +70,69 @@ class PlacedBets extends Component {
       pastChallenges: pastChallenges,
       isUserDataLoading: false
     })
-    console.log(this.state)
 
   }
-  handleTabChange = (event, value) => {
+
+  withdrawChallenge = (challengeID) => {
+    this.setState({
+      onGoingChallenges: this.state.onGoingChallenges.filter((obj) => obj.challenge._id !== challengeID),
+      pendingChallenges: this.state.pendingChallenges.filter((obj) => obj.challenge._id !== challengeID),
+    })
+  }
+
+  deleteChallenge = (challengeID) => {
+    this.setState({
+      pendingChallenges: this.state.pendingChallenges.filter((obj) => obj.challenge._id !== challengeID),
+    })
+  }
+
+  acceptChallenge = (challengeID) => {
+    this.setState({
+      pendingChallenges: this.state.pendingChallenges.filter((obj) => obj.challenge._id !== challengeID),
+    })
+    let user = this.state.user
+    const challengeBetAmount = this.state.pendingChallenges.filter((obj)=>obj.challenge._id===challengeID)[0].challenge.betAmount
+    user.rewardCoins -= challengeBetAmount
+    this.setState({
+      user: user
+    })
+  }
+
+  handleTabChange = async (event, value) => {
     this.setState({
       tabValue: value
+    })
+    this.setState({
+
+      onGoingChallenges: [],
+      pendingChallenges: [],
+      pastChallenges: [],
+    })
+    const challengeResponse = await axios.post('/api/get_challenges')
+    if (!challengeResponse.data.success) {
+      this.props.history.push('/')
+      return
+    }
+    let onGoingChallenges = [], pendingChallenges = [], pastChallenges = []
+
+    challengeResponse.data.result.forEach((obj) => {
+      const challenge = obj.challenge
+      const match = obj.match
+      if (challenge.accepted === false) {
+        pendingChallenges.push(obj)
+        return
+      }
+      if (match.status === 'Not Started') {
+        onGoingChallenges.push(obj)
+        return
+      }
+      pastChallenges.push(obj)
+    })
+
+    this.setState({
+      onGoingChallenges: onGoingChallenges,
+      pendingChallenges: pendingChallenges,
+      pastChallenges: pastChallenges,
     })
   }
 
@@ -115,7 +172,7 @@ class PlacedBets extends Component {
         <Grid item className='gridItem' xs={12}>
           <Card variant='outlined'>
             <CardContent>
-              <Box display='flex' justifyContent='space-between'>
+              <Box display='flex' justifyContent='space-between' alignItems='center'>
 
                 <Typography variant='h5'>
                   Your Prediction Battles
@@ -161,9 +218,8 @@ class PlacedBets extends Component {
               {this.state.onGoingChallenges.map((challenge) => {
                 if (this.checkDisplayConditions(challenge))
                   return (
-                    <Grid item xs={12}>
-                      <Card variant='outlined'>
-                      </Card>
+                    <Grid item xs={12} className='gridItem'>
+                      <ChallengeView matchObj={challenge.match} challenge={challenge.challenge} otherUser={challenge.otherUser} user={this.state.user} withdrawChallengeCallback={this.withdrawChallenge} acceptChallengeCallback={this.acceptChallenge} deleteChallenge={this.deleteChallenge} />
                     </Grid>
                   )
                 return null
@@ -177,7 +233,7 @@ class PlacedBets extends Component {
                   if (this.checkDisplayConditions(challenge))
                     return (
                       <Grid item xs={12} className='gridItem'>
-                        <ChallengeView matchObj={challenge.match} challenge={challenge.challenge} otherUser={challenge.otherUser} user={this.state.user} withdrawChallengeCallback={this.withdrawChallenge} acceptChallengeCallback={this.acceptChallenge} deleteChallenge={this.deleteChallenge}/>
+                        <ChallengeView matchObj={challenge.match} challenge={challenge.challenge} otherUser={challenge.otherUser} user={this.state.user} withdrawChallengeCallback={this.withdrawChallenge} acceptChallengeCallback={this.acceptChallenge} deleteChallenge={this.deleteChallenge} />
                       </Grid>
                     )
                   return null
@@ -185,13 +241,13 @@ class PlacedBets extends Component {
               </Grid>
 
               :
+            
               <Grid>
                 {this.state.pastChallenges.map((challenge) => {
                   if (this.checkDisplayConditions(challenge))
                     return (
-                      <Grid item xs={12}>
-                        <Card variant='outlined'>
-                        </Card>
+                      <Grid item xs={12} className='gridItem'>
+                        <ChallengeView matchObj={challenge.match} challenge={challenge.challenge} otherUser={challenge.otherUser} user={this.state.user} withdrawChallengeCallback={this.withdrawChallenge} acceptChallengeCallback={this.acceptChallenge} deleteChallenge={this.deleteChallenge} />
                       </Grid>
                     )
                   return null
