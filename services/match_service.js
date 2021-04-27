@@ -28,7 +28,7 @@ fetchData = async () => {
   var options = {
     method: 'GET',
     url: 'https://v3.football.api-sports.io/fixtures',
-    qs: { date: nowDate,next:50 },
+    qs: { date: nowDate},
     headers: {
       'x-rapidapi-host': 'v3.football.api-sports.io',
       'x-rapidapi-key': footballApiKey
@@ -59,14 +59,18 @@ fetchData = async () => {
       }
       const result = JSON.parse(body)
       const fixtureDetails = result.response
+      console.log(result)
       if (result.errors.length > 0) {
         console.log(result.errors)
         return
       }
+      var p = 0
       await Promise.all(fixtureDetails.map(async (res) => {
         const response = await Match.findOne({ matchID: res.fixture.id })
         if (response) return true
-        if(res.fixture.status.long==='Time to be defined') return true
+        if(res.fixture.status.long!=='Not Started') return true
+        if(p>70) return true
+        p += 1
         await new Match({
           matchID: res.fixture.id,
           referee: res.fixture.referee,
