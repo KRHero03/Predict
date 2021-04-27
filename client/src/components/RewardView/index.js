@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
-import { IconButton, Tooltip, Box, Typography, Grid, Card,  CardContent, CircularProgress, Button, } from '@material-ui/core'
-import { Shop } from '@material-ui/icons'
+import { Snackbar,IconButton, Tooltip, Box, Typography, Grid, Card,  CardContent, CircularProgress, Button, } from '@material-ui/core'
+import { Shop,Close } from '@material-ui/icons'
 import { Skeleton } from '@material-ui/lab'
 import { withRouter } from "react-router"
 import axios from 'axios'
 
 
 
-class UserView extends Component {
+class RewardView extends Component {
 
   constructor(props) {
     super(props)
@@ -17,20 +17,43 @@ class UserView extends Component {
       isButtonClicked: false,
       isModalOpen: false,
       confirmClaim: false,
+      openSnackbar: false,
+      snackbarText: '',
     }
   }
 
   async componentDidMount() {
   }
 
+
+
+  handleSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({
+      openSnackbar: !this.state.openSnackbar
+    })
+  }
+
+
+  showMessage = (msg) => {
+    this.setState({
+      snackbarText: msg,
+      openSnackbar: true
+    })
+  }
+
   goToConfirm = () => {
     if (this.state.user.rewardCoins < this.state.reward.cost) {
+      this.showMessage('Not enough P Coins!')
       this.setState({
         confirmClaim: false,
       })
       return
     }
     if (this.state.reward.quantity === 0) {
+      this.showMessage('Out of Stock!')
       this.setState({
         confirmClaim: false,
       })
@@ -55,6 +78,7 @@ class UserView extends Component {
 
 
       if (!this.state.confirmClaim) {
+        this.showMessage('Failed to Claim Reward!')
         this.setState({
           confirmClaim: false,
           isButtonClicked: false
@@ -63,6 +87,7 @@ class UserView extends Component {
       }
       const response = await axios.post('/api/claim_reward', { id: this.state.reward._id })
       if (!response.data.success) {
+        this.showMessage('Failed to Claim Reward! Make sure you have enough P Coins!')
         this.setState({
           confirmClaim: false,
           isButtonClicked: false
@@ -80,7 +105,7 @@ class UserView extends Component {
         isButtonClicked: false
       })
     } catch (e) {
-      console.log(e)
+      this.showMessage('Failed to Claim Reward!')
       this.setState({
         confirmClaim: false,
         isButtonClicked: false
@@ -160,6 +185,23 @@ class UserView extends Component {
             </Box>
           </Grid>
         </CardContent>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          open={this.state.openSnackbar}
+          autoHideDuration={6000}
+          onClose={this.handleSnackbar}
+          message={this.state.snackbarText}
+          action={
+            <React.Fragment>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleSnackbar}>
+                <Close fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
 
       </Card>
 
@@ -168,4 +210,4 @@ class UserView extends Component {
 
 }
 
-export default withRouter(UserView);
+export default withRouter(RewardView);

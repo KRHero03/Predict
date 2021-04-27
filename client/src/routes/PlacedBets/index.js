@@ -1,10 +1,10 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card, Box, Tabs, Tab, CardContent, InputBase, Dialog, CardHeader, CardActions, Avatar, IconButton, Tooltip, Collapse } from "@material-ui/core";
-import { Search, PlayArrow, ExpandMore } from '@material-ui/icons';
+import { Typography, Card, Box, Tabs, Tab, CardContent, InputBase, IconButton, Snackbar } from "@material-ui/core";
+import { Search, Close } from '@material-ui/icons';
 import Logo from "../../logo.png";
 import axios from 'axios'
 import ChallengeView from '../../components/ChallengeView'
@@ -20,7 +20,9 @@ class PlacedBets extends Component {
       onGoingChallenges: [],
       pendingChallenges: [],
       pastChallenges: [],
-      search: ''
+      search: '',
+      openSnackbar: false,
+      snackbarText: '',
     };
   }
 
@@ -73,7 +75,26 @@ class PlacedBets extends Component {
 
   }
 
+
+  handleSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({
+      openSnackbar: !this.state.openSnackbar
+    })
+  }
+
+
+  showMessage = (msg) => {
+    this.setState({
+      snackbarText: msg,
+      openSnackbar: true
+    })
+  }
+
   withdrawChallenge = (challengeID) => {
+    this.showMessage('Prediction Battle Removed!')
     this.setState({
       onGoingChallenges: this.state.onGoingChallenges.filter((obj) => obj.challenge._id !== challengeID),
       pendingChallenges: this.state.pendingChallenges.filter((obj) => obj.challenge._id !== challengeID),
@@ -81,17 +102,19 @@ class PlacedBets extends Component {
   }
 
   deleteChallenge = (challengeID) => {
+    this.showMessage('Prediction Battle Declined!')
     this.setState({
       pendingChallenges: this.state.pendingChallenges.filter((obj) => obj.challenge._id !== challengeID),
     })
   }
 
   acceptChallenge = (challengeID) => {
+    this.showMessage('Prediction Battle Accepted!')
     this.setState({
       pendingChallenges: this.state.pendingChallenges.filter((obj) => obj.challenge._id !== challengeID),
     })
     let user = this.state.user
-    const challengeBetAmount = this.state.pendingChallenges.filter((obj)=>obj.challenge._id===challengeID)[0].challenge.betAmount
+    const challengeBetAmount = this.state.pendingChallenges.filter((obj) => obj.challenge._id === challengeID)[0].challenge.betAmount
     user.rewardCoins -= challengeBetAmount
     this.setState({
       user: user
@@ -241,7 +264,7 @@ class PlacedBets extends Component {
               </Grid>
 
               :
-            
+
               <Grid>
                 {this.state.pastChallenges.map((challenge) => {
                   if (this.checkDisplayConditions(challenge))
@@ -255,6 +278,23 @@ class PlacedBets extends Component {
               </Grid>
 
         }
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          open={this.state.openSnackbar}
+          autoHideDuration={6000}
+          onClose={this.handleSnackbar}
+          message={this.state.snackbarText}
+          action={
+            <React.Fragment>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleSnackbar}>
+                <Close fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
       </Grid >
     );
   }

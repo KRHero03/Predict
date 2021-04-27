@@ -1,10 +1,10 @@
-import { Component } from "react";
+import React,{ Component } from "react";
 import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card, Box, CardContent, Collapse, CardActions, Avatar, CardHeader, Dialog, Tooltip, IconButton, CircularProgress, TextField, Checkbox, FormControlLabel, Select, MenuItem, FormControl, InputLabel } from "@material-ui/core";
-import { ExpandMore, Send } from '@material-ui/icons';
+import { Typography, Card, Box, CardContent, Collapse, CardActions, Avatar, CardHeader, Dialog, Tooltip, IconButton, CircularProgress, TextField, Checkbox, FormControlLabel, Select, MenuItem, FormControl, Snackbar } from "@material-ui/core";
+import { ExpandMore, Send,Close } from '@material-ui/icons';
 import Logo from "../../logo.png";
 import axios from 'axios'
 
@@ -25,7 +25,9 @@ class Create extends Component {
       isCreateButtonClicked: false,
       expanded: false,
       investedCoins: "",
-      selectedTeam: 'home'
+      selectedTeam: 'home',
+      openSnackbar: false,
+      snackbarText: '',
     };
 
   }
@@ -62,6 +64,22 @@ class Create extends Component {
     })
   }
 
+  handleSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({
+      openSnackbar: !this.state.openSnackbar
+    })
+  }
+
+
+  showMessage = (msg) => {
+    this.setState({
+      snackbarText: msg,
+      openSnackbar: true
+    })
+  }
 
   toggleLeagueModal = () => {
     this.setState({
@@ -125,6 +143,7 @@ class Create extends Component {
     })
     try {
       if (this.state.selectedFriends.length === 0) {
+        this.showMessage('Please select some Friends!')
         this.setState({
           isCreateButtonClicked: false
         })
@@ -133,7 +152,7 @@ class Create extends Component {
       }
       let investedAmount = parseInt(this.state.investedCoins)
       if (!investedAmount) {
-        console.log('Please enter valid Bet Amount!')
+        this.showMessage('Please enter valid Bet Amount! Remember, the Gross Bet Amount is the Value you entered times the number of Friends you select!')
         this.setState({
           isCreateButtonClicked: false
         })
@@ -142,7 +161,7 @@ class Create extends Component {
       }
       let betAmount = investedAmount * this.state.selectedFriends.length
       if (betAmount > this.state.user.rewardCoins) {
-        console.log('Insufficient P Coins!')
+        this.showMessage('Please enter valid Bet Amount! Remember, the Gross Bet Amount is the Value you entered times the number of Friends you select!')
         this.setState({
           isCreateButtonClicked: false
         })
@@ -152,19 +171,20 @@ class Create extends Component {
       const response = await axios.post('/api/create_challenge',{matchID:this.state.matchID,selectedFriends:this.state.selectedFriends,betAmount:investedAmount,selectedTeam:this.state.selectedTeam})
 
       if(!response.data.success){
-        console.log('Failed to Create Prediction Battle!')
+        this.showMessage('Failed to send Prediction Battle Request!')
         this.setState({
           isCreateButtonClicked: false
         })
         return
       }
-      console.log('Prediction Battle Request Sent to your Friends!')
+      
+      this.showMessage('Prediction Battle Request Sent to your Friends!')
       this.setState({
         isCreateButtonClicked: false
       })
       return
     } catch (e) {
-      console.log(e)
+      this.showMessage('Failed to send Prediction Battle Request!')
 
       this.setState({
         isCreateButtonClicked: false
@@ -403,6 +423,23 @@ class Create extends Component {
             </CardContent>
           </Card>
         </Grid>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          open={this.state.openSnackbar}
+          autoHideDuration={6000}
+          onClose={this.handleSnackbar}
+          message={this.state.snackbarText}
+          action={
+            <React.Fragment>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleSnackbar}>
+                <Close fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
 
 
       </Grid >

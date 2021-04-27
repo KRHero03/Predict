@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { IconButton, Tooltip, Collapse, CardActions, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress } from '@material-ui/core'
-import { Delete, ExpandMore, RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons'
+import { IconButton, Tooltip, Collapse, CardActions, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress, Snackbar } from '@material-ui/core'
+import { Delete, ExpandMore, RemoveCircleOutline, AddCircleOutline, Close } from '@material-ui/icons'
 import { withRouter } from "react-router"
 import axios from 'axios'
 
@@ -18,6 +18,8 @@ class ChallengeView extends Component {
       isTeamAwayModalOpen: false,
       isButtonClicked: false,
       expanded: false,
+      openSnackbar: false,
+      snackbarText: '',
     }
   }
 
@@ -25,6 +27,23 @@ class ChallengeView extends Component {
 
   }
 
+
+  handleSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({
+      openSnackbar: !this.state.openSnackbar
+    })
+  }
+
+
+  showMessage = (msg) => {
+    this.setState({
+      snackbarText: msg,
+      openSnackbar: true
+    })
+  }
 
   toggleLeagueModal = () => {
     this.setState({
@@ -53,9 +72,6 @@ class ChallengeView extends Component {
     })
   }
 
-  createPredictionBattle = () => {
-    this.props.history.push('/create/' + this.state.match.matchID)
-  }
   hasMatchStarted = () => {
     const d = new Date().getTime()
     return d > this.state.match.timestamp
@@ -67,9 +83,16 @@ class ChallengeView extends Component {
       isButtonClicked: true
     })
     try {
-      await axios.post('/api/withdraw_challenge', { id: this.state.challenge._id })
+      const response = await axios.post('/api/withdraw_challenge', { id: this.state.challenge._id })
+      if(!response.data.success){
+        this.showMessage('Failed to Withdraw Prediction Battle!')
+        this.setState({
+          isButtonClicked: false
+        })
+      }
       this.props.withdrawChallengeCallback(this.state.challenge._id)
     } catch (e) {
+      this.showMessage('Failed to Withdraw Prediction Battle!')
       this.setState({
         isButtonClicked: false
       })
@@ -82,9 +105,16 @@ class ChallengeView extends Component {
       isButtonClicked: true
     })
     try {
-      await axios.post('/api/accept_challenge', { id: this.state.challenge._id })
+      const response = await axios.post('/api/accept_challenge', { id: this.state.challenge._id })
+      if(!response.data.success){
+        this.showMessage('Failed to Accept Prediction Battle!')
+        this.setState({
+          isButtonClicked: false
+        })
+      }
       this.props.acceptChallengeCallback(this.state.challenge._id)
     } catch (e) {
+      this.showMessage('Failed to Accept Prediction Battle!')
       this.setState({
         isButtonClicked: false
       })
@@ -288,6 +318,23 @@ class ChallengeView extends Component {
         <Dialog className='dialog' onClose={this.toggleTeamAwayModal} open={this.state.isTeamAwayModalOpen}>
           <img src={this.state.match.teamAway.logo} alt='Team Away' />
         </Dialog>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          open={this.state.openSnackbar}
+          autoHideDuration={6000}
+          onClose={this.handleSnackbar}
+          message={this.state.snackbarText}
+          action={
+            <React.Fragment>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleSnackbar}>
+                <Close fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
       </Card >
 
     )

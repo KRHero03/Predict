@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { Link, IconButton, Tooltip, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress } from '@material-ui/core'
-import { AddCircle, Delete, AddCircleOutline, DeleteOutline, RemoveCircleOutline } from '@material-ui/icons'
+import { Snackbar,Link, IconButton, Tooltip, Box, Typography, Grid, Dialog, Card, CardHeader, Avatar, CardContent, CircularProgress } from '@material-ui/core'
+import { Close,AddCircle, Delete, AddCircleOutline, DeleteOutline, RemoveCircleOutline } from '@material-ui/icons'
 import { Skeleton } from '@material-ui/lab'
 import { withRouter } from "react-router"
 import axios from 'axios'
@@ -20,6 +20,8 @@ class UserView extends Component {
       notFound: false,
       friendshipStatus: 0,
       isModalOpen: false,
+      openSnackbar: false,
+      snackbarText: '',
     }
   }
 
@@ -52,6 +54,23 @@ class UserView extends Component {
     })
   }
 
+  handleSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({
+      openSnackbar: !this.state.openSnackbar
+    })
+  }
+
+
+  showMessage = (msg) => {
+    this.setState({
+      snackbarText: msg,
+      openSnackbar: true
+    })
+  }
+
   sendFriendRequest = async () => {
     try {
       this.setState({
@@ -59,16 +78,19 @@ class UserView extends Component {
       })
       const response = await axios.post('/api/send_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Send Friend Request!')
         this.setState({
           isButtonClicked: false
         })
         return
       }
+      this.showMessage('Sent Friend Request!')
       this.setState({
         isButtonClicked: false,
         friendshipStatus: 1
       })
     } catch (e) {
+      this.showMessage('Failed to Send Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -83,6 +105,7 @@ class UserView extends Component {
       })
       const response = await axios.post('/api/withdraw_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Withdraw Friend Request!')
         this.setState({
           isButtonClicked: false
         })
@@ -96,6 +119,7 @@ class UserView extends Component {
         this.props.withdrawFriendRequestCallback(this.state.user._id)
       }
     } catch (e) {
+      this.showMessage('Failed to Withdraw Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -111,6 +135,7 @@ class UserView extends Component {
       })
       const response = await axios.post('/api/accept_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Accept Friend Request!')
         this.setState({
           isButtonClicked: false
         })
@@ -124,6 +149,7 @@ class UserView extends Component {
         this.props.friendRequestCallback(this.state.user._id,1)
       }
     } catch (e) {
+      this.showMessage('Failed to Accept Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -138,6 +164,7 @@ class UserView extends Component {
       })
       const response = await axios.post('/api/reject_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Reject Friend Request!')
         this.setState({
           isButtonClicked: false
         })
@@ -151,6 +178,7 @@ class UserView extends Component {
         this.props.friendRequestCallback(this.state.user._id,0)
       }
     } catch (e) {
+      this.showMessage('Failed to Reject Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -164,6 +192,7 @@ class UserView extends Component {
       })
       const response = await axios.post('/api/remove_friend', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Remove Friend Request!')
         this.setState({
           isButtonClicked: false
         })
@@ -177,6 +206,7 @@ class UserView extends Component {
         this.props.removeFriendCallback(this.state.user._id)
       }
     } catch (e) {
+      this.showMessage('Failed to Remove Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -279,6 +309,23 @@ class UserView extends Component {
           aria-describedby='Profile Photo' onClose={this.toggleModalOpen} open={this.state.isModalOpen}>
           <img src={this.state.user.photo} alt='Profile' />
         </Dialog>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          open={this.state.openSnackbar}
+          autoHideDuration={6000}
+          onClose={this.handleSnackbar}
+          message={this.state.snackbarText}
+          action={
+            <React.Fragment>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleSnackbar}>
+                <Close fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
       </Card>
 
     )

@@ -1,10 +1,10 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import MetaTags from "react-meta-tags";
-import { Typography, Card,Tabs, Tab, CircularProgress, Box, Link, TextField, CardContent, Avatar,  IconButton, Tooltip, Dialog } from "@material-ui/core";
-import { AddCircle, RemoveCircleOutline, AddCircleOutline, Delete, DeleteOutline, Send } from '@material-ui/icons';
+import { Typography, Card, Tabs, Tab, CircularProgress, Box, Link, TextField, CardContent, Avatar, IconButton, Tooltip, Dialog, Snackbar } from "@material-ui/core";
+import { AddCircle, RemoveCircleOutline, AddCircleOutline, Delete, DeleteOutline, Send, Close } from '@material-ui/icons';
 import Logo from "../../logo.png";
 import axios from 'axios'
 
@@ -24,6 +24,8 @@ class Profile extends Component {
       isReferralButtonClicked: false,
       usedReferralCodeSuccess: false,
       rewards: [],
+      openSnackbar: false,
+      snackbarText: '',
     };
   }
   async componentDidMount() {
@@ -68,6 +70,22 @@ class Profile extends Component {
     })
   }
 
+  handleSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({
+      openSnackbar: !this.state.openSnackbar
+    })
+  }
+
+
+  showMessage = (msg) => {
+    this.setState({
+      snackbarText: msg,
+      openSnackbar: true
+    })
+  }
   toggleModalOpen = () => {
     this.setState({
       ...this.state,
@@ -83,16 +101,19 @@ class Profile extends Component {
       })
       const response = await axios.post('/api/send_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to send Friend Request!')
         this.setState({
           isButtonClicked: false
         })
         return
       }
+      this.showMessage('Friend Request Sent!')
       this.setState({
         isButtonClicked: false,
         friendshipStatus: 1
       })
     } catch (e) {
+      this.showMessage('Failed to send Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -107,16 +128,19 @@ class Profile extends Component {
       })
       const response = await axios.post('/api/withdraw_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to send Withdraw Request!')
         this.setState({
           isButtonClicked: false
         })
         return
       }
+      this.showMessage('Friend Request Withdrawn!')
       this.setState({
         isButtonClicked: false,
         friendshipStatus: 0
       })
     } catch (e) {
+      this.showMessage('Failed to send Withdraw Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -132,16 +156,19 @@ class Profile extends Component {
       })
       const response = await axios.post('/api/accept_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Accept Friend Request!')
         this.setState({
           isButtonClicked: false
         })
         return
       }
+      this.showMessage('Accepted Friend Request!')
       this.setState({
         isButtonClicked: false,
         friendshipStatus: 3
       })
     } catch (e) {
+      this.showMessage('Failed to Accept Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -156,16 +183,19 @@ class Profile extends Component {
       })
       const response = await axios.post('/api/reject_friend_request', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Reject Friend Request!')
         this.setState({
           isButtonClicked: false
         })
         return
       }
+      this.showMessage('Rejected Friend Request!')
       this.setState({
         isButtonClicked: false,
         friendshipStatus: 0
       })
     } catch (e) {
+      this.showMessage('Failed to Reject Friend Request!')
       this.setState({
         isButtonClicked: false,
       })
@@ -179,16 +209,19 @@ class Profile extends Component {
       })
       const response = await axios.post('/api/remove_friend', { id: this.state.id })
       if (!response.data.success) {
+        this.showMessage('Failed to Remove Friend!')
         this.setState({
           isButtonClicked: false
         })
         return
       }
+      this.showMessage('Removed Friend!')
       this.setState({
         isButtonClicked: false,
         friendshipStatus: 0
       })
     } catch (e) {
+      this.showMessage('Failed to Remove Friend!')
       this.setState({
         isButtonClicked: false,
       })
@@ -202,6 +235,7 @@ class Profile extends Component {
     })
     try {
       if (!this.state.usedReferralCode || this.state.usedReferralCode === 0) {
+        this.showMessage('Please enter a valid Referral Code!')
         this.setState({
           isReferralButtonClicked: false,
         })
@@ -211,16 +245,19 @@ class Profile extends Component {
       const response = await axios.post('/api/use_referral_code', { code: this.state.usedReferralCode })
 
       if (!response.data.success) {
+        this.showMessage('Failed to Use Referral Code!')
         this.setState({
           isReferralButtonClicked: false
         })
         return
       }
+      this.showMessage('Used Referral Code!')
       this.setState({
         isReferralButtonClicked: false,
         usedReferralCodeSuccess: true,
       })
     } catch (e) {
+      this.showMessage('Failed to Use Referral Code!')
       this.setState({
         isReferralButtonClicked: false
       })
@@ -241,6 +278,7 @@ class Profile extends Component {
   }
 
   copyToClipboard = (text) => {
+    this.showMessage('Copied code to Clipboard!')
     navigator.clipboard.writeText(text)
   }
 
@@ -489,6 +527,24 @@ class Profile extends Component {
           aria-describedby='Profile Photo' onClose={this.toggleModalOpen} open={this.state.isModalOpen}>
           <img src={this.state.user.photo} alt='Profile' />
         </Dialog>
+
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          open={this.state.openSnackbar}
+          autoHideDuration={6000}
+          onClose={this.handleSnackbar}
+          message={this.state.snackbarText}
+          action={
+            <React.Fragment>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleSnackbar}>
+                <Close fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
       </Grid >
     );
   }
