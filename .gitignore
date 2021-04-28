@@ -118,6 +118,5 @@ dist
 
 package-lock.json
 client/package-lock.json
-config/.env
 
 t.js
