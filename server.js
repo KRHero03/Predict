@@ -55,6 +55,7 @@ require("./config/passport");
 
 
 require("./routes/api/auth.js")(app);
+require("./routes/api/notification.js")(app);
 require("./routes/api/search.js")(app);
 require("./routes/api/matches.js")(app);
 require("./routes/api/friends.js")(app);

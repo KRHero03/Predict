@@ -28,6 +28,14 @@ a{
   }
 }
 
+.unseen{
+  background-color: rgba(0,255,255,0.3);
+}
+
+.notificationMenuCard{
+  min-width: 400px;
+}
+
 .search {
   position:relative;
   border-radius: 4px;

@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { AppBar, Toolbar, IconButton, Typography, Drawer, InputBase } from '@material-ui/core'
+import { AppBar, Card, CardHeader, Grid, Link, Avatar, Menu, Toolbar, IconButton, Typography, Drawer, InputBase, Box, Tooltip, Badge } from '@material-ui/core'
 import useScrollTrigger from '@material-ui/core/useScrollTrigger'
 import Logo from '../../logo.png'
-import { Menu, Search } from '@material-ui/icons'
+import { Search, Notifications } from '@material-ui/icons'
+import MenuIcon from '@material-ui/icons/Menu'
 import { withRouter } from "react-router"
 import GuestLinks from '../GuestLinks'
 import SignInLinks from '../SignInLinks'
@@ -31,6 +32,9 @@ class Navbar extends Component {
       user: null,
       isLoading: true,
       search: '',
+      notifications: [],
+      unseen: [],
+      anchorEl: null,
     }
   }
 
@@ -44,8 +48,27 @@ class Navbar extends Component {
     }
     this.setState({
       isAuthenticated: true,
-      isLoading: false,
       user: response.data
+    })
+
+    const notificationResponse = await axios.post('/api/get_notifications')
+
+    if (!notificationResponse.data.success) {
+      return
+    }
+
+    const nData = notificationResponse.data.result
+    this.setState({
+      notifications: nData
+    })
+    let unseen = []
+    nData.forEach((n) => {
+      if (!n.seen) {
+        unseen.push(n._id)
+      }
+    })
+    this.setState({
+      unseen: unseen
     })
 
   }
@@ -88,9 +111,31 @@ class Navbar extends Component {
     }
   }
 
+  handleNotificationOpen = (e) => {
+
+    this.setState({
+      anchorEl: e.currentTarget
+    })
+  }
+
+  handleNotificationClose = async () => {
+    this.setState({
+      anchorEl: null
+    })
+    await Promise.all(this.state.unseen.map(async (id) => {
+      await axios.post('/api/check_seen_notification', { id: id })
+    }))
+    this.setState({
+      unseen: []
+    })
+  }
 
 
 
+  getTime = (timestamp) => {
+    const d = new Date(timestamp)
+    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
+  }
 
   render() {
     return (
@@ -107,7 +152,7 @@ class Navbar extends Component {
                     color="inherit"
                     aria-label="open drawer"
                   >
-                    <Menu />
+                    <MenuIcon />
                   </IconButton>
                   <React.Fragment key="left">
                     <Drawer anchor="left" open={this.state.leftDrawer} onClose={this.toggleDrawer}>
@@ -117,29 +162,38 @@ class Navbar extends Component {
                 </div>
                 : null}
               <img src={Logo} alt="Logo" className='iconDesktop' />
-              <Typography href="/" component="a" className='title' variant="h6" noWrap>
+              <Typography href="/" component="a" className='iconDesktop title ' variant="h6" noWrap>
                 Predict
               </Typography>
 
-              <div className='grow' />
+              <div className='grow iconDesktop' />
               {
-              this.state.isAuthenticated
-              ?              
-              <div className='search'>
-                <div className='searchIcon'>
-                  <Search />  
-                </div>
-                <InputBase
-                  placeholder="Search Users..."
-                  className='inputBase'
-                  inputProps={{ 'aria-label': 'search' }}
-                  onKeyUp={this.handleSearch}
-                  onChange={this.handleSearchVal}
-                />
-              </div>
-              :
+                this.state.isAuthenticated
+                  ?
+                  <Box display='flex' alignItems='center'>
+                    <div className='search'>
+                      <div className='searchIcon'>
+                        <Search />
+                      </div>
+                      <InputBase
+                        placeholder="Search Users..."
+                        className='inputBase'
+                        inputProps={{ 'aria-label': 'search' }}
+                        onKeyUp={this.handleSearch}
+                        onChange={this.handleSearchVal}
+                      />
+                    </div>
+                    <Tooltip title='Show Notifications'>
+                      <IconButton onClick={this.handleNotificationOpen}>
+                        <Badge badgeContent={this.state.unseen.length === 0 ? null : this.state.unseen.length} color="secondary">
+                          <Notifications style={{ color: 'white' }} />
+                        </Badge>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                  :
 
-              null
+                  null
               }
               {
                 this.state.isLoading ? null :
@@ -149,7 +203,42 @@ class Navbar extends Component {
             </Toolbar>
           </AppBar>
         </ElevationScroll>
-      </div>
+
+        <Menu
+          anchorEl={this.state.anchorEl}
+          keepMounted
+          open={Boolean(this.state.anchorEl)}
+          onClose={this.handleNotificationClose}
+        >
+          <Grid item xs={12} style={{ marginLeft: 10, marginRight: 10, marginBottom: 10 }}>
+            <Typography variant='h5'>
+              {this.state.unseen.length !== 0 ? ('Notifications (' + this.state.unseen.length + ')') : 'Notifications'}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} style={{ maxHeight: 700, overflowY: 'scroll' }}>
+            {
+              this.state.notifications.map((n) => {
+                return (
+                  <Grid item xs={12}
+                    className='notificationMenuCard' style={{ marginLeft: 10, marginRight: 10 }}>
+                    <Link className='link' href={n.link} >
+                      <Card variant='outlined' className={this.state.unseen.includes(n._id) ? 'unseen' : ''}>
+                        <CardHeader
+                          avatar={
+                            <Avatar aria-label="profile-photo" src={n.photo} />
+                          }
+                          title={n.message}
+                          subheader={this.getTime(n.timestamp)}
+                        />
+                      </Card>
+                    </Link>
+                  </Grid>
+                )
+              })
+            }
+          </Grid>
+        </Menu>
+      </div >
 
     )
   }

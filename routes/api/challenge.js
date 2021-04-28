@@ -4,6 +4,7 @@ const app = express();
 const Challenge = require("../../models/challenge");
 const Match = require("../../models/match");
 const User = require("../../models/user");
+const {addNotification} = require('../../services/create_notification')
 module.exports = app => {
     app.post('/api/create_challenge', async (req, res) => {
         try {
@@ -54,7 +55,9 @@ module.exports = app => {
                     winner: 'nil',
                     sentBy: selectedTeam
                 }).save()
-                console.log('Saved Challenge')
+                
+                const message = req.user.name + ' sent you a Prediction Battle Request!'
+                await addNotification(id,message,req.user.photo,'/bets/1')
             }))
 
             res.send({ success: 1 })
@@ -109,11 +112,14 @@ module.exports = app => {
             }
             const id = req.body.id
             const challenge = await Challenge.findOne({ _id: id })
+            const otherUserID = user._id === challenge.userID1 ? challenge.userID2 : challenge.userID1
             if (user._id != challenge.userID1 &&  user._id!=challenge.userID2) {
                 res.send({ success: 0 })
                 return
             }
             if (!challenge.accepted) {
+                const message = req.user.name + ' has withdrawn from your Prediction Battle!'
+                await addNotification(otherUserID,message,req.user.photo,'/bets/1')
                 await challenge.delete()
                 res.send({ success: 1 })
             }
@@ -123,7 +129,8 @@ module.exports = app => {
                 res.send({ success: 0 })
                 return
             }
-            const otherUserID = user._id === challenge.userID1 ? challenge.userID2 : challenge.userID1
+            const message = req.user.name + ' has withdrawn from your Prediction Battle!'
+            await addNotification(otherUserID,message,req.user.photo,'/bets/1')
             const otherUser = await User.findOne({ _id: otherUserID })
             otherUser.set({ rewardCoins: otherUser.rewardCoins + challenge.betAmount })
             await otherUser.save()
@@ -174,6 +181,8 @@ module.exports = app => {
                 return
             }
 
+            const message = req.user.name + ' has accepted your Prediction Battle!'
+            await addNotification(otherUserID,message,req.user.photo,'/bets/0')
             otherUser.set({ rewardCoins: otherUser.rewardCoins - challenge.betAmount })
             await otherUser.save()
             user.set({ rewardCoins: user.rewardCoins - challenge.betAmount })

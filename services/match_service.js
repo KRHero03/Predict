@@ -4,6 +4,7 @@ const User = require('../models/user')
 const Challenge = require('../models/challenge')
 const { env, dev, production } = require('../config/keys')
 var request = require("request");
+const { addNotification } = require('./create_notification')
 
 const footballApiKey = env === 'dev' ? dev.apiFootballKey : production.apiFootballKey
 
@@ -12,6 +13,7 @@ module.exports.fetchMatchFixtures = () => {
   setTimers()
   setInterval(() => {
     fetchData()
+    setTimers()
   }, 60 * 60 * 24 * 1000)
 }
 
@@ -28,7 +30,7 @@ fetchData = async () => {
   var options = {
     method: 'GET',
     url: 'https://v3.football.api-sports.io/fixtures',
-    qs: { date: nowDate},
+    qs: { date: nowDate },
     headers: {
       'x-rapidapi-host': 'v3.football.api-sports.io',
       'x-rapidapi-key': footballApiKey
@@ -59,7 +61,6 @@ fetchData = async () => {
       }
       const result = JSON.parse(body)
       const fixtureDetails = result.response
-      console.log(result)
       if (result.errors.length > 0) {
         console.log(result.errors)
         return
@@ -68,8 +69,8 @@ fetchData = async () => {
       await Promise.all(fixtureDetails.map(async (res) => {
         const response = await Match.findOne({ matchID: res.fixture.id })
         if (response) return true
-        if(res.fixture.status.long!=='Not Started') return true
-        if(p>70) return true
+        if (res.fixture.status.long !== 'Not Started') return true
+        if (p >= 20) return true
         p += 1
         await new Match({
           matchID: res.fixture.id,
@@ -107,7 +108,7 @@ fetchData = async () => {
         }).save()
       }
     });
-    
+
 
   } catch (e) {
     console.log(e)
@@ -124,17 +125,21 @@ setTimers = async () => {
     d.setTime(d.getTime() + 1000 * 60 * 60 * 5)
     const fetchTimestamp = d.getTime()
     const curDate = new Date().getTime()
-    if(curDate-fetchTimestamp>24*60*60*1000)
+    if (curDate - fetchTimestamp > 24 * 60 * 60 * 1000)
       return
     const diff = Math.max(1000, fetchTimestamp - curDate)
-
-    setTimerForMatch(id, diff)
+    //setTimerForMatch(id, diff)
   })
   console.log('Completed Setting timers')
 }
 
 setTimerForMatch = (id, diff) => {
-  setTimeout(() => {
+  setTimeout(async () => {
+    const match = await Match.findOne({ matchID: id })
+    if (match.status === 'Match Finished' || match.status === 'Not Decided (Declared as Draw)') {
+      return
+    }
+    
     var options = {
       method: 'GET',
       url: 'https://v3.football.api-sports.io/fixtures',
@@ -159,7 +164,7 @@ setTimerForMatch = (id, diff) => {
         }
         const winner = fixtureDetails.teams.home.winner ? 'home' : fixtureDetails.team.home.away ? 'away' : 'nil'
         const matchResponse = await Match.findOne({ matchID: id })
-        matchResponse.set({ winner: winner, status: fixtureDetails.fixture.status.long==='Match Finished'?'Match Finished':'Not Decided (Declared as Draw)' })
+        matchResponse.set({ winner: winner, status: fixtureDetails.fixture.status.long === 'Match Finished' ? 'Match Finished' : 'Not Decided (Declared as Draw)' })
         await matchResponse.save()
         if (!matchResponse.challenges) return
 
@@ -171,7 +176,7 @@ setTimerForMatch = (id, diff) => {
             const userID1 = challenge.userID1
             const userID2 = challenge.userID2
             const amount = challenge.betAmount
-            challenge.set({ status: fixtureDetails.fixture.status.long==='Match Finished'?'Match Finished':'Not Decided (Declared as Draw)', winner: 'nil' })
+            challenge.set({ status: fixtureDetails.fixture.status.long === 'Match Finished' ? 'Match Finished' : 'Not Decided (Declared as Draw)', winner: 'nil' })
             await challenge.save()
             const user1 = await User.findOne({ _id: userID1 })
             user1.set({ rewardCoins: user1.rewardCoins + amount })
@@ -179,6 +184,9 @@ setTimerForMatch = (id, diff) => {
             const user2 = await User.findOne({ _id: userID2 })
             user2.set({ rewardCoins: user2.rewardCoins + amount })
             user2.save()
+            const message = 'Match ' + match.teamHome.name + ' vs ' + match.teamAway.name + ' has been declared as draw! Your P Coins have been refunded!'
+            await addNotification(user1._id, message, match.league.photo, '/bets/2')
+            await addNotification(user2._id, message, match.league.photo, '/bets/2')
           }))
         } else if (winner === 'home') {
           await Promise.all(challenges.map(async (id) => {
@@ -194,6 +202,10 @@ setTimerForMatch = (id, diff) => {
             const referredUser = await User.findOne({ referralCode: user1.usedReferralCode })
             referredUser.set({ rewardCoins: referredUser.rewardCoins + Math.trunc(2 * 0.1 * amount) })
             await referredUser.save()
+            const winMessage = 'Match ' + match.teamHome.name + ' vs ' + match.teamAway.name + ' has been won by ' + match.teamHome.name + '! Congratulations, You have won the Prediction battle!'
+            const lostMessage = 'Match ' + match.teamHome.name + ' vs ' + match.teamAway.name + ' has been won by ' + match.teamHome.name + '! Sorry, You have lost the Prediction battle!'
+            await addNotification(user1._id, winMessage, match.league.photo, '/bets/2')
+            await addNotification(user2._id, lostMessage, match.league.photo, '/bets/2')
           }))
         } else if (winner === 'away') {
           await Promise.all(challenges.map(async (id) => {
@@ -208,6 +220,10 @@ setTimerForMatch = (id, diff) => {
             const referredUser = await User.findOne({ referralCode: user2.usedReferralCode })
             referredUser.set({ rewardCoins: referredUser.rewardCoins + Math.trunc(2 * 0.1 * amount) })
             await referredUser.save()
+            const winMessage = 'Match ' + match.teamHome.name + ' vs ' + match.teamAway.name + ' has been won by ' + match.teamAway.name + '! Congratulations, You have won the Prediction battle!'
+            const lostMessage = 'Match ' + match.teamHome.name + ' vs ' + match.teamAway.name + ' has been won by ' + match.teamAway.name + '! Sorry, You have lost the Prediction battle!'
+            await addNotification(user1._id, lostMessage, match.league.photo, '/bets/2')
+            await addNotification(user2._id, winMessage, match.league.photo, '/bets/2')
           }))
 
         }
