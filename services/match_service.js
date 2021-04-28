@@ -233,6 +233,7 @@ setTimerForMatch = (id, diff) => {
         const d = new Date().getTime()
         setTimerForMatch(id, d + 1000 * 60 * 60 * 5)
       }
+
     })
   }, diff)
 }
