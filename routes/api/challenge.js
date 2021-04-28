@@ -139,13 +139,6 @@ module.exports = app => {
             await Match.updateOne({ matchID: challenge.matchID }, { $pull: { challenges: challenge._id } })
             await challenge.delete()
             
-            await new Notification({
-                userID: otherUserID,
-                message: user.name + " has rejected your challenge for a battle!",
-                link: env=="dev"?"http://localhost:3000/bets/0":"https://predict-webapp.herokuapp.com/bets/0",
-                timestamp: new Date().getTime(),
-            }).save();
-            console.log("Notification created!");
 
             res.send({ success: 1 })
             return
@@ -200,13 +193,6 @@ module.exports = app => {
             await challenge.save()
             await Match.updateOne({ matchID: matchID }, { $push: { challenges: challenge._id } })
 
-            await new Notification({
-                userID: otherUserID,
-                message: user.name + " has accepted your challenge for a battle!",
-                link: env=="dev"?"http://localhost:3000/bets/0":"https://predict-webapp.herokuapp.com/bets/0",
-                timestamp: new Date().getTime(),
-            }).save();
-            console.log("Notification created!");
 
             res.send({ success: 1 })
         } catch (e) {

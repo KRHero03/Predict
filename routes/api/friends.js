@@ -34,8 +34,8 @@ module.exports = app => {
                 res.send({success:0})
                 return
             }
-            await users.update({_id:cID},{$pull:{sentFriendRequests:userID}})
-            await users.update({_id:userID},{$pull:{friendRequests:cID}})
+            await users.updateOne({_id:cID},{$pull:{sentFriendRequests:userID}})
+            await users.updateOne({_id:userID},{$pull:{friendRequests:cID}})
 
             res.send({success:1})
 
@@ -61,13 +61,6 @@ module.exports = app => {
             await addNotification(userID,message,req.user.photo,'/friends/0')
 
             const user = await users.findOne({_id: cID});
-            await new Notification({
-                userID: userID,
-                message: user.name + " has accepted your a friend request!",
-                link: env=="dev"?"http://localhost:3000/friends/0":"https://predict-webapp.herokuapp.com/friends/0",
-                timestamp: new Date().getTime(),
-            }).save();
-            console.log("Notification created!");
 
 
             res.send({success:1})
@@ -85,18 +78,11 @@ module.exports = app => {
                 res.send({success:0})
                 return
             }
-            await users.update({_id:cID},{$pull:{friendRequests:userID}})
-            await users.update({_id:userID},{$pull:{sentFriendRequests:cID}})
+            await users.updateOne({_id:cID},{$pull:{friendRequests:userID}})
+            await users.updateOne({_id:userID},{$pull:{sentFriendRequests:cID}})
 
             
             const user = await users.findOne({_id: cID});
-            await new Notification({
-                userID: userID,
-                message: user.name + " has rejected your a friend request!",
-                link: env=="dev"?"http://localhost:3000/friends/0":"https://predict-webapp.herokuapp.com/friends/0",
-                timestamp: new Date().getTime(),
-            }).save();
-            console.log("Notification created!");
 
             res.send({success:1})
 
@@ -119,14 +105,6 @@ module.exports = app => {
 
             
             const user = await users.findOne({_id: cID});
-            await new Notification({
-                userID: userID,
-                message: user.name + " has removed you as a friend!",
-                link: env=="dev"?"http://localhost:3000/friends/0":"https://predict-webapp.herokuapp.com/friends/0",
-                timestamp: new Date().getTime(),
-            }).save();
-            console.log("Notification created!");
-
 
             res.send({success:1})
 
