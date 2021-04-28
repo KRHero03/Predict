@@ -27,6 +27,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-redux": "^5.1.1",
     "redux": "^4.0.1",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "request": "^2.88.2"
   }
 }

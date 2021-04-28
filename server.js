@@ -22,6 +22,7 @@ require("./models/rewards.js");
 require("./models/match.js");
 require("./models/server_variables.js");
 require("./models/transactions.js");
+require("./models/notification.js");
 
 app.use(
   cookieSession({
@@ -61,6 +62,7 @@ require("./routes/api/friends.js")(app);
 require("./routes/api/users.js")(app);
 require("./routes/api/rewards.js")(app);
 require("./routes/api/challenge.js")(app);
+require("./routes/api/notification.js")(app);
 
 fetchMatchFixtures()
 // Server static assets if in production

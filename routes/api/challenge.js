@@ -4,6 +4,9 @@ const app = express();
 const Challenge = require("../../models/challenge");
 const Match = require("../../models/match");
 const User = require("../../models/user");
+const Notification = require("../../models/notification");
+const {env} = require("../../config/keys");
+
 module.exports = app => {
     app.post('/api/create_challenge', async (req, res) => {
         try {
@@ -55,6 +58,15 @@ module.exports = app => {
                     sentBy: selectedTeam
                 }).save()
                 console.log('Saved Challenge')
+                
+                await new Notification({
+                    userID: userID2,
+                    message: user.name + " has challenged you for a battle!",
+                    link: env=="dev"?"http://localhost:3000/bets/0":"https://predict-webapp.herokuapp.com/bets/0",
+                    timestamp: new Date().getTime(),
+                }).save();
+                console.log("Notification created!");
+            
             }))
 
             res.send({ success: 1 })
@@ -131,6 +143,15 @@ module.exports = app => {
             await user.save()
             await Match.updateOne({ matchID: challenge.matchID }, { $pull: { challenges: challenge._id } })
             await challenge.delete()
+            
+            await new Notification({
+                userID: otherUserID,
+                message: user.name + " has rejected your challenge for a battle!",
+                link: env=="dev"?"http://localhost:3000/bets/0":"https://predict-webapp.herokuapp.com/bets/0",
+                timestamp: new Date().getTime(),
+            }).save();
+            console.log("Notification created!");
+
             res.send({ success: 1 })
             return
         } catch (e) {
@@ -181,6 +202,15 @@ module.exports = app => {
             challenge.set({ accepted: true })
             await challenge.save()
             await Match.updateOne({ matchID: matchID }, { $push: { challenges: challenge._id } })
+
+            await new Notification({
+                userID: otherUserID,
+                message: user.name + " has accepted your challenge for a battle!",
+                link: env=="dev"?"http://localhost:3000/bets/0":"https://predict-webapp.herokuapp.com/bets/0",
+                timestamp: new Date().getTime(),
+            }).save();
+            console.log("Notification created!");
+
             res.send({ success: 1 })
         } catch (e) {
             console.log(e)
