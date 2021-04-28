@@ -13,7 +13,7 @@ module.exports = app => {
                 res.send({ success: 0 })
                 return
             }
-            const matchID = parseInt(req.body.matchID)
+            const matchID = req.body.matchID
             const betAmount = req.body.betAmount
             const selectedFriends = req.body.selectedFriends
             const selectedTeam = req.body.selectedTeam
