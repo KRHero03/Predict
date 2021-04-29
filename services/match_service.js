@@ -173,7 +173,7 @@ setTimerForMatch = (id, diff) => {
         if (!matchResponse.challenges) return
 
         const challenges = matchResponse.challenges
-        if (winner === 'nil') {
+        if (winner == 'nil') {
           await Promise.all(challenges.map(async (id) => {
 
             const challenge = await Challenge.findOne({ _id: id })
@@ -198,7 +198,7 @@ setTimerForMatch = (id, diff) => {
             await addNotification(user1._id, message, matchResponse.league.logo, '/bets/2')
             await addNotification(user2._id, message, matchResponse.league.logo, '/bets/2')
           }))
-        } else if (winner === 'home') {
+        } else if (winner == 'home') {
           await Promise.all(challenges.map(async (id) => {
 
             const challenge = await Challenge.findOne({ _id: id })
@@ -222,7 +222,7 @@ setTimerForMatch = (id, diff) => {
             await addNotification(user1._id, winMessage, matchResponse.league.logo, '/bets/2')
             await addNotification(user2._id, lostMessage, matchResponse.league.logo, '/bets/2')
           }))
-        } else if (winner === 'away') {
+        } else if (winner == 'away') {
           await Promise.all(challenges.map(async (id) => {
             const challenge = await Challenge.findOne({ _id: id })
             const userID2 = challenge.userID2

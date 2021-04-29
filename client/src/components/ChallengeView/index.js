@@ -89,6 +89,7 @@ class ChallengeView extends Component {
         this.setState({
           isButtonClicked: false
         })
+        return
       }
       this.props.withdrawChallengeCallback(this.state.challenge._id)
     } catch (e) {
@@ -111,6 +112,7 @@ class ChallengeView extends Component {
         this.setState({
           isButtonClicked: false
         })
+        return
       }
       this.props.acceptChallengeCallback(this.state.challenge._id)
     } catch (e) {

@@ -112,8 +112,8 @@ module.exports = app => {
             }
             const id = req.body.id
             const challenge = await Challenge.findOne({ _id: id })
-            const otherUserID = user._id === challenge.userID1 ? challenge.userID2 : challenge.userID1
-            if (user._id != challenge.userID1 &&  user._id!=challenge.userID2) {
+            const otherUserID = user._id == challenge.userID1 ? challenge.userID2 : challenge.userID1
+            if (user._id != challenge.userID1 &&  user._id!= challenge.userID2) {
                 res.send({ success: 0 })
                 return
             }
@@ -137,8 +137,7 @@ module.exports = app => {
             user.set({ rewardCoins: user.rewardCoins + challenge.betAmount })
             await user.save()
             await Match.updateOne({ matchID: challenge.matchID }, { $pull: { challenges: challenge._id } })
-            await challenge.delete()
-            
+            await challenge.delete()          
 
             res.send({ success: 1 })
             return
@@ -175,7 +174,7 @@ module.exports = app => {
                 res.send({ success: 0 })
                 return
             }
-            const otherUserID = user._id === challenge.userID1 ? challenge.userID2 : challenge.userID1
+            const otherUserID = user._id == challenge.userID1 ? challenge.userID2 : challenge.userID1
             const otherUser = await User.findOne({ _id: otherUserID })
             if (otherUser.rewardCoins < challenge.betAmount) {
                 await challenge.delete()
@@ -191,7 +190,7 @@ module.exports = app => {
             await user.save()
             challenge.set({ accepted: true })
             await challenge.save()
-            await Match.updateOne({ matchID: matchID }, { $push: { challenges: challenge._id } })
+            await Match.updateOne({ matchID: match.matchID }, { $push: { challenges: challenge._id } })
 
 
             res.send({ success: 1 })
