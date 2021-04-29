@@ -118,6 +118,8 @@ fetchData = async () => {
 setTimers = async () => {
   console.log('Setting Timers for Ongoing Matches')
   const response = await Match.find({ status: { $ne: "Match Finished" } }, { matchID: 1, timestamp: 1 })
+  var cnt = 0
+  var interval = 60000
   response.forEach((res) => {
     const id = res.matchID
     const matchTime = res.timestamp
@@ -126,7 +128,11 @@ setTimers = async () => {
     const fetchTimestamp = d.getTime()
     const curDate = new Date().getTime()
     const diff = Math.max(1000, fetchTimestamp - curDate)
-    setTimerForMatch(id, diff)
+
+    setTimeout(()=>{
+      setTimerForMatch(id, diff)
+    },cnt)
+    cnt = cnt + interval
   })
   console.log('Completed Setting timers')
 }
@@ -137,7 +143,7 @@ setTimerForMatch = (id, diff) => {
     if (match.status === 'Match Finished' || match.status === 'Not Decided (Declared as Draw)') {
       return
     }
-
+    console.log('Getting Match Details for Match',id)
     var options = {
       method: 'GET',
       url: 'https://v3.football.api-sports.io/fixtures',
@@ -159,7 +165,6 @@ setTimerForMatch = (id, diff) => {
           setTimerForMatch(id, 1000 * 60 * 60 * 24)
           return
         }
-        console.log(fixtureDetails)
         const winner = fixtureDetails.teams.home.winner ? 'home' : fixtureDetails.teams.away.winner ? 'away' : 'nil'
         const matchResponse = await Match.findOne({ matchID: id })
         matchResponse.set({ winner: winner, teamHome: { score: fixtureDetails.goals.home }, teamAway: { score: fixtureDetails.goals.away }, status: fixtureDetails.fixture.status.long === 'Match Finished' ? 'Match Finished' : 'Not Decided (Declared as Draw)' })
