@@ -26,6 +26,8 @@ class Profile extends Component {
       rewards: [],
       openSnackbar: false,
       snackbarText: '',
+      myScore: 0,
+      friendScore: 0,
     };
   }
   async componentDidMount() {
@@ -68,6 +70,21 @@ class Profile extends Component {
       friendshipStatus: status,
       usedReferralCodeSuccess: userData.usedReferralCode !== '' ? true : false,
     })
+    let scoreQuery;
+    scoreQuery = await axios.post('/api/get_score', {userId: cID, friendId: this.state.user._id});
+    if(scoreQuery.success){
+      this.setState({
+        myScore: user2Score,
+        friendScore: user1Score,
+      })
+    }
+    else{
+      scoreQuery = await axios.post('/api/get_score', {friendId: cID, userId: this.state.user._id});
+      this.setState({
+        myScore: user1Score,
+        friendScore: user2Score,
+      })
+    }
   }
 
   handleSnackbar = (event, reason) => {
@@ -394,12 +411,16 @@ class Profile extends Component {
                 {
                   this.state.friendshipStatus === 3
                     ?
-
-                    <Typography variant='caption' color='textSecondary'>
-                      Email: <Link href={'emailto:' + this.state.user.email} component='a' className='link'>
-                        {this.state.user.email}
-                      </Link>
-                    </Typography>
+                    <div>
+                      <Typography variant='caption' color='textSecondary'>
+                        Email: <Link href={'emailto:' + this.state.user.email} component='a' className='link'>
+                          {this.state.user.email}
+                        </Link>
+                      </Typography>
+                      <Typography variant='caption' color='textSecondary'>
+                        Score: {this.state.myScore} - {this.state.friendScore}
+                      </Typography>
+                    </div>
                     :
                     null
                 }

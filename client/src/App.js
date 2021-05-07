@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { CssBaseline } from '@material-ui/core';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer'
+import Navbar from './components/navbar';
+import Footer from './components/footer'
 import Home from './routes/Home';
 import Friends from './routes/Friends';
 import Create from './routes/Create';

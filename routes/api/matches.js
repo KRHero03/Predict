@@ -23,8 +23,8 @@ module.exports = app => {
             console.log(err);
             res.send({ success: 0 });
         }
-
-    })
+        
+    });
     app.post('/api/get_match_for_prediction', async (req, res) => {
         try {
             if(!req.user){

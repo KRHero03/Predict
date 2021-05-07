@@ -26,7 +26,7 @@ passport.use(
     {
       clientID: keys.googleClientID,
       clientSecret: keys.googleClientSecret,
-      callbackURL: env=="dev"?"http://localhost:3000/auth/google/callback":"https://predict-webapp.herokuapp.com/auth/google/callback",
+      callbackURL: env=="dev"?"http://localhost:3000/auth/google/callback":"http://localhost:3000/auth/google/callback",
       proxy: true
     },
     (accessToken, refreshToken, profile, done) => {
