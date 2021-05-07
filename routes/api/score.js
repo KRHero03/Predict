@@ -1,5 +1,6 @@
 const { response } = require("express");
 const express = require("express");
+const challenge = require("../../models/challenge");
 const app = express();
 const Score = require("../../models/score");
 const User = require("../../models/user");
@@ -7,8 +8,11 @@ const User = require("../../models/user");
 module.exports = app => {
     app.post('/api/get_score', async (req, res) => {
         try {
-            const userId = parseInt(req.body.userId)
-            const friendId = parseInt(req.body.friendId)
+            const userId = req.body.userId
+            const friendId = req.body.friendId
+
+            console.log(userId);
+            console.log(friendId);
 
             if (!userId || !friendId) {
                 res.send({ success: 0 })
