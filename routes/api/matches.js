@@ -15,7 +15,7 @@ module.exports = app => {
             }
             const skip = req.body.skip
 
-            const response = await Match.find({}).sort({timestamp:'desc'}).skip(skip).limit(10)
+            const response = await Match.find({}).sort({timestamp:'asc'}).skip(skip).limit(10)
             res.send({success:1,result:response})
         
 
