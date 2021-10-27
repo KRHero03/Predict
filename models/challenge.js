@@ -15,7 +15,7 @@ const ChallengeSchema = new Schema({
     default: false,
   },
   matchID: {
-    type: Number,
+    type: String,
     required: true,
   },
   betAmount: {

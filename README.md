@@ -1,5 +1,3 @@
 # Predict
-- MERN Stack Football Fantasy League WebApp
-- Demo : https://predict-webapp.herokuapp.com/
-
-
+- MERN Stack Sports Prediction Battle WebApp
+- Demo: https://predict-webapp.herokuapp.com/

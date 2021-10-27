@@ -4,7 +4,7 @@ const app = express();
 const Challenge = require("../../models/challenge");
 const Match = require("../../models/match");
 const User = require("../../models/user");
-const {addNotification} = require('../../services/create_notification')
+const { addNotification } = require('../../services/create_notification')
 module.exports = app => {
     app.post('/api/create_challenge', async (req, res) => {
         try {
@@ -13,7 +13,7 @@ module.exports = app => {
                 res.send({ success: 0 })
                 return
             }
-            const matchID = parseInt(req.body.matchID)
+            const matchID = req.body.matchID
             const betAmount = req.body.betAmount
             const selectedFriends = req.body.selectedFriends
             const selectedTeam = req.body.selectedTeam
@@ -55,9 +55,9 @@ module.exports = app => {
                     winner: 'nil',
                     sentBy: selectedTeam
                 }).save()
-                
+
                 const message = req.user.name + ' sent you a Prediction Battle Request!'
-                await addNotification(id,message,req.user.photo,'/bets/1')
+                await addNotification(id, message, req.user.photo, '/bets/1')
             }))
 
             res.send({ success: 1 })
@@ -112,14 +112,14 @@ module.exports = app => {
             }
             const id = req.body.id
             const challenge = await Challenge.findOne({ _id: id })
-            const otherUserID = user._id === challenge.userID1 ? challenge.userID2 : challenge.userID1
-            if (user._id != challenge.userID1 &&  user._id!=challenge.userID2) {
+            const otherUserID = user._id == challenge.userID1 ? challenge.userID2 : challenge.userID1
+            if (user._id != challenge.userID1 && user._id != challenge.userID2) {
                 res.send({ success: 0 })
                 return
             }
             if (!challenge.accepted) {
                 const message = req.user.name + ' has withdrawn from your Prediction Battle!'
-                await addNotification(otherUserID,message,req.user.photo,'/bets/1')
+                await addNotification(otherUserID, message, req.user.photo, '/bets/1')
                 await challenge.delete()
                 res.send({ success: 1 })
             }
@@ -130,7 +130,7 @@ module.exports = app => {
                 return
             }
             const message = req.user.name + ' has withdrawn from your Prediction Battle!'
-            await addNotification(otherUserID,message,req.user.photo,'/bets/1')
+            await addNotification(otherUserID, message, req.user.photo, '/bets/1')
             const otherUser = await User.findOne({ _id: otherUserID })
             otherUser.set({ rewardCoins: otherUser.rewardCoins + challenge.betAmount })
             await otherUser.save()
@@ -138,7 +138,7 @@ module.exports = app => {
             await user.save()
             await Match.updateOne({ matchID: challenge.matchID }, { $pull: { challenges: challenge._id } })
             await challenge.delete()
-            
+
             res.send({ success: 1 })
             return
         } catch (e) {
@@ -174,7 +174,7 @@ module.exports = app => {
                 res.send({ success: 0 })
                 return
             }
-            const otherUserID = user._id === challenge.userID1 ? challenge.userID2 : challenge.userID1
+            const otherUserID = user._id == challenge.userID1 ? challenge.userID2 : challenge.userID1
             const otherUser = await User.findOne({ _id: otherUserID })
             if (otherUser.rewardCoins < challenge.betAmount) {
                 await challenge.delete()
@@ -183,15 +183,14 @@ module.exports = app => {
             }
 
             const message = req.user.name + ' has accepted your Prediction Battle!'
-            await addNotification(otherUserID,message,req.user.photo,'/bets/0')
+            await addNotification(otherUserID, message, req.user.photo, '/bets/0')
             otherUser.set({ rewardCoins: otherUser.rewardCoins - challenge.betAmount })
             await otherUser.save()
             user.set({ rewardCoins: user.rewardCoins - challenge.betAmount })
             await user.save()
             challenge.set({ accepted: true })
             await challenge.save()
-            await Match.updateOne({ matchID: matchID }, { $push: { challenges: challenge._id } })
-
+            await Match.updateOne({ matchID: match.matchID }, { $push: { challenges: challenge._id } })
             res.send({ success: 1 })
         } catch (e) {
             console.log(e)
